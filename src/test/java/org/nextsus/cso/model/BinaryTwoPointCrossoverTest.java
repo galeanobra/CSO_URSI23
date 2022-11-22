@@ -15,7 +15,7 @@ public class BinaryTwoPointCrossoverTest {
 
     @Test
     void doCrossover() {
-        StaticCSO cso = new StaticCSO("main.conf", "LL", 0);
+        StaticCSO cso = new StaticCSO("main.properties", "LL", 0);
 
         Random r = new Random(1234567890);
 

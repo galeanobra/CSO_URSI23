@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 class UDNTest {
 
     @Test
-    void prueba() {
+    void validateProperties() {
 
     }
 }
