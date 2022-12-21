@@ -183,7 +183,7 @@ public class User {
         Point p = udn.getGridPoint(x_, y_, z_);
 
         //sinr in dB
-        sinr = p.computeSINR(c);
+        sinr = p.computeSNR(c);
 
         log2sinr = Math.log1p(sinr) / Math.log(2.0);
 
@@ -195,7 +195,7 @@ public class User {
     public double capacity(UDN udn, double bw) {
         Point p = udn.getGridPoint(x_, y_, z_);
 
-        double sinr = p.computeSINR(this.servingCell_);
+        double sinr = p.computeSNR(this.servingCell_);
         double log2sinr = Math.log1p(sinr) / Math.log(2.0);
 
         return bw * log2sinr;   // Capacity
@@ -214,7 +214,7 @@ public class User {
         Point p = udn.getGridPoint(x_, y_, z_);
         Cell servingCell = this.getServingCell();
 
-        double sinr = p.computeSINR(servingCell);
+        double sinr = p.computeSNR(servingCell);
         int nt = servingCell.getNumAntTx();
         double capacity = 0;
         double[] singularValues = servingCell.getSingularValuesH();

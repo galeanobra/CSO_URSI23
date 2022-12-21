@@ -7,34 +7,29 @@ import org.nextsus.cso.model.cells.Sector;
 import java.util.*;
 
 /**
- * @author paco
+ * Class representing a point of the grid
  */
 public class Point {
+    UDN udn;
 
-    //Reference to the problem
-    UDN udn_;
+    // Point coordinates
+    int x;
+    int y;
+    int z;
 
-    //Point coordinates
-    int x_;
-    int y_;
-    int z_;
+    Map<Double, BTS> installedBTS;
 
-    Map<Double, BTS> installedBTS_;
+    Region propagationRegion;
 
-    //Propagation region
-    Region propagationRegion_;
-
-    //SINR
-    Map<Double, Double> totalReceivedPower_;
-//    Map<Double, Cell> sinr_;
+    Map<Double, Double> totalReceivedPower;
 
     //Used to precompute stats only when needed_
-    boolean statsComputed_;
+    boolean statsComputed;
 
     //Function<Cell, Double> function_;
 
-    Map<Integer, Double> signalPowerMap_ = new HashMap<>();
-    Map<Integer, Double> sinrMap_ = new HashMap<>();
+    Map<Integer, Double> signalPowerMap = new HashMap<>();
+    Map<Integer, Double> snrMap = new HashMap<>();
 
     boolean canDeploy;
 
@@ -46,23 +41,23 @@ public class Point {
      * @param z Coordinate z
      */
     Point(UDN udn, int x, int y, int z) {
-        udn_ = udn;
-        x_ = x;
-        y_ = y;
-        z_ = z;
+        this.udn = udn;
+        this.x = x;
+        this.y = y;
+        this.z = z;
 
-        installedBTS_ = new TreeMap<>();
-        propagationRegion_ = null;
-        totalReceivedPower_ = null;
-        statsComputed_ = false;
+        installedBTS = new TreeMap<>();
+        propagationRegion = null;
+        totalReceivedPower = null;
+        statsComputed = false;
     }
 
-    Region getPropagationRegion() {
-        return this.propagationRegion_;
+    public Region getPropagationRegion() {
+        return this.propagationRegion;
     }
 
     void setPropagationRegion(Region r) {
-        propagationRegion_ = r;
+        propagationRegion = r;
     }
 
     /**
@@ -72,30 +67,37 @@ public class Point {
      * @return The received power
      */
     public double computeSignalPower(Cell c) {
-        double powerDBm;
+        double power;
 
-        //create a new map after X insertions to bound the memory used
-        if (signalPowerMap_.get(c.getID()) == null) {
+        if (signalPowerMap.get(c.getID()) == null) {
             Sector sec = c.getSector();
-            double pathLoss = this.propagationRegion_.pathloss_;
-            double receptorGain = Math.pow(10.0, sec.getReceptorGain() / 10.0);
-            double transmitterGain = Math.pow(10.0, sec.getTransmitterGain() / 10.0);
+            double receptorGain = sec.getReceptorGain();
+            double transmitterGain = sec.getTransmitterGain();
             double waveLength = c.getWavelength();
-            double transmitterPower = sec.getTransmittedPower();
-            double distance = this.udn_.distance(this.x_, this.y_, this.z_, sec.getX(), sec.getY(), sec.getZ());
-            double power;
-            int[] angles = this.udn_.calculateAngles(this, sec.getBTS());
-            double attenuationFactor = c.getAttenuationFactor(angles[0], angles[1]);
-            double loss = Math.pow((waveLength / (4.0 * Math.PI * distance)), pathLoss);
-            power = receptorGain * transmitterGain * transmitterPower * loss * attenuationFactor;
-            //
-            powerDBm = 10.0 * Math.log10(power);
-            signalPowerMap_.put(c.getID(), powerDBm);
+            double transmitterPower = 10 * Math.log10(sec.getTransmittedPower());
+            int[] angles = udn.calculateAngles(this, sec.getBTS());
+            double attenuationFactor = 10 * Math.log10(c.getAttenuationFactor(angles[0], angles[1]));
+
+            List<Point> segments = new MultiSegment(this, c).divideSegment();   // Obtain a discrete line divided by segments between the Point and the Cell
+            Point previous = segments.get(0);               // Cell, first point of the segment
+            double loss = 0;
+            for (int i = 1; i < segments.size(); i++) {
+                Point p = segments.get(i);
+                double distanceToPrevious = udn.distance(p.x, p.y, p.z, previous.x, previous.y, previous.z); // Distance from p to previous Point
+                double pathLoss = p.getPropagationRegion().getPathloss();
+                double totalDistance = udn.distance(p.x, p.y, p.z, sec.getX(), sec.getY(), sec.getZ());
+                double previousDistanceToCell = udn.distance(previous.x, previous.y, previous.z, sec.getX(), sec.getY(), sec.getZ());
+                loss += i == 1 ? 10 * pathLoss * Math.log10(waveLength / (4.0 * Math.PI * distanceToPrevious)) : 10 * pathLoss * Math.log10(previousDistanceToCell / totalDistance);
+                previous = p;
+            }
+
+            power = receptorGain + transmitterGain + transmitterPower + attenuationFactor + loss;
+            signalPowerMap.put(c.getID(), power);
         } else {
-            powerDBm = signalPowerMap_.get(c.getID());
+            power = signalPowerMap.get(c.getID());
         }
 
-        return powerDBm;
+        return power;
     }
 
     /**
@@ -109,8 +111,8 @@ public class Point {
         double minDistance = Double.MAX_VALUE;
         double d;
 
-        for (SocialAttractor s : udn.socialAttractors_) {
-            d = udn.distance(this.x_, this.y_, this.z_, s.getX(), s.getY(), s.getZ());
+        for (SocialAttractor s : udn.getSocialAttractors()) {
+            d = udn.distance(this.x, this.y, this.z, s.getX(), s.getY(), s.getZ());
             if (d < minDistance) {
                 minDistance = d;
                 sa = s;
@@ -127,55 +129,48 @@ public class Point {
      * @return The Euclidean distance from this point to the Cell BTS
      */
     private double distanceToBTS(Cell c) {
-        return this.udn_.distance(this.x_, this.y_, this.z_, c.getBTS().getX(), c.getBTS().getY(), c.getBTS().getZ());
+        return this.udn.distance(this.x, this.y, this.z, c.getBTS().getX(), c.getBTS().getY(), c.getBTS().getZ());
     }
 
     /**
-     * Computes the received SINR from a given cell
+     * Computes the received SNR from a given cell
      *
      * @param c Cell
-     * @return SINR received by c
+     * @return SNR received by c
      */
-    public double computeSINR(Cell c) {
+    public double computeSNR(Cell c) {
 
-        //get the bandwidth of the Cell and its working frequency
+        // Get the bandwidth of the Cell and its working frequency
         double cellBW = c.getTotalBW();
-        double frequency = c.getBTS().getWorkingFrequency();
+//        double frequency = c.getBTS().getWorkingFrequency();
 
-        //compute the noise
+        // Compute the noise
         double pn = -174 + 10.0 * Math.log10(cellBW * 1000000);
 
-        //get the averaged power received at the BTS working frequency
-        double totalPower = this.totalReceivedPower_.get(frequency);
+        // Get the averaged power received at the BTS working frequency
+//        double totalPower = this.totalReceivedPower_.get(frequency);
 
-        //compute the power received at this point from Cell c
+        // Compute the power received at this point from Cell c
         double power = this.computeSignalPower(c);
 
         //double distance = this.udn_.distance(this.x_, this.y_, c.getBTS().getX(), c.getBTS().getY());
-        //compute the SINR
-        //dB -> mW
 
-        pn = Math.pow(10.0, pn / 10);
-        power = Math.pow(10.0, power / 10);
-
-        return power / (totalPower - power + pn);
+        return power - pn; //(totalPower - power + pn);
     }
 
     /**
-     * Precomputes the averaged SINR at each grid point, for each
+     * Precomputes the averaged SNR at each grid point, for each
      */
-    void computeTotalReceivedPower() {
+    public void computeTotalReceivedPower() {
         //allocate memory at this point
-        totalReceivedPower_ = new TreeMap<>();
+        totalReceivedPower = new TreeMap<>();
 
         double sum, power;
 
-        for (double frequency : this.udn_.cells_.keySet()) {
+        for (double frequency : this.udn.getCells().keySet()) {
             sum = 0.0;
-
-            for (Cell c : this.udn_.cells_.get(frequency)) {
+            for (Cell c : this.udn.getCells().get(frequency)) {
                 if (c.isActive()) {
-
                     power = computeSignalPower(c);
                     //dB -> mW
                     power = Math.pow(10.0, power / 10);
@@ -183,7 +178,7 @@ public class Point {
                 }
             }
 
-            this.totalReceivedPower_.put(frequency, sum);
+            this.totalReceivedPower.put(frequency, sum);
         }
     }
 
@@ -201,9 +196,9 @@ public class Point {
         double maxPower = Double.NEGATIVE_INFINITY;
         Cell closest = null;
 
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            for (Cell c : udn_.cells_.get(frequency)) {
-                power = this.computeSignalPower(c);
+        for (Double frequency : udn.getCells().keySet()) {
+            for (Cell c : udn.getCells().get(frequency)) {
+                power = computeSignalPower(c);
                 if (power > maxPower) {
                     maxPower = power;
                     closest = c;
@@ -215,29 +210,29 @@ public class Point {
     }
 
     /**
-     * Returns the cell that serves with the best SINR, regardless of its
+     * Returns the cell that serves with the best SNR, regardless of its
      * operating frequency.
      *
-     * @return The cell with higher SINR
+     * @return The cell with higher SNR
      */
-    public Cell getCellWithHigherSINR() {
+    public Cell getCellWithHigherSNR() {
         double sinr;
-        Map<Double, Double> maxSINR = new TreeMap<>();
+        Map<Double, Double> maxSNR = new TreeMap<>();
         Map<Double, Cell> servingBTSs = new TreeMap<>();
         Cell servingCell = null;
 
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            maxSINR.put(frequency, Double.NEGATIVE_INFINITY);
+        for (Double frequency : udn.getCells().keySet()) {
+            maxSNR.put(frequency, Double.NEGATIVE_INFINITY);
         }
 
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            for (Cell c : udn_.cells_.get(frequency)) {
+        for (Double frequency : udn.getCells().keySet()) {
+            for (Cell c : udn.getCells().get(frequency)) {
                 if (c.isActive()) {
-                    sinr = this.computeSINR(c);
+                    sinr = computeSNR(c);
 
                     //quality, regardless of the cell activation
-                    if (sinr > maxSINR.get(frequency)) {
-                        maxSINR.put(frequency, sinr);
+                    if (sinr > maxSNR.get(frequency)) {
+                        maxSNR.put(frequency, sinr);
                         servingBTSs.put(frequency, c);
                     }
                 }
@@ -249,8 +244,8 @@ public class Point {
 //            for (Cell c : this.udn_.cellsOfInterestByPoint.get(this).get(frequency)) {
 //                if (c.isActive()) {
 //                    sinr = this.computeSINR(c);
-//                    if (sinr > maxSINR.get(frequency)) {
-//                        maxSINR.put(frequency, sinr);
+//                    if (sinr > maxSNR.get(frequency)) {
+//                        maxSNR.put(frequency, sinr);
 //                        servingBTSs.put(frequency, c);
 //                    }
 //                }
@@ -260,7 +255,7 @@ public class Point {
         //retrieve the best among the precomputed values
         double maxValue = Double.NEGATIVE_INFINITY;
         for (Double f : servingBTSs.keySet()) {
-            sinr = maxSINR.get(f);
+            sinr = maxSNR.get(f);
             if (sinr > maxValue) {
                 maxValue = sinr;
                 servingCell = servingBTSs.get(f);
@@ -270,87 +265,25 @@ public class Point {
         return servingCell;
     }
 
-    /**
-     * Returns the cell that serves with the best SINR, discarding macrocells
-     * and regardless of its operating frequency.
-     *
-     * @return The cell with higher SINR discarding macrocells
-     */
-    public Cell getCellWithHigherSINRButMacro() {
+    public Cell getCellWithHigherSNRByType(UDN.CellType type) {
         double sinr;
-        Map<Double, Double> maxSINR = new TreeMap<>();
-        Map<Double, Cell> servingBTSs = new TreeMap<>();
+        double maxSNR = Double.NEGATIVE_INFINITY;
         Cell servingCell = null;
 
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            maxSINR.put(frequency, Double.NEGATIVE_INFINITY);
-        }
+        for (Double frequency : udn.getCells().keySet()) {
+            if (!udn.getCells().get(frequency).isEmpty()) {
+                if (udn.getCells().get(frequency).get(0).getType().equals(type)) {
+                    for (Cell c : udn.getCells().get(frequency)) {
+                        if (c.isActive()) {
+                            sinr = this.computeSNR(c);
 
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            for (Cell c : udn_.cells_.get(frequency)) {
-
-                if (c.isActive() && !(c.getType().toString().equalsIgnoreCase("MACRO"))) {
-                    sinr = this.computeSINR(c);
-
-                    //quality, regardless of the cell activation
-                    if (sinr > maxSINR.get(frequency)) {
-                        maxSINR.put(frequency, sinr);
-                        servingBTSs.put(frequency, c);
+                            if (sinr > maxSNR) {
+                                maxSNR = sinr;
+                                servingCell = c;
+                            }
+                        }
                     }
                 }
-            }
-        }//for
-
-        //retrieve the best among the precomputed values
-        double maxValue = Double.NEGATIVE_INFINITY;
-        for (Double f : servingBTSs.keySet()) {
-            sinr = maxSINR.get(f);
-            if (sinr > maxValue) {
-                maxValue = sinr;
-                servingCell = servingBTSs.get(f);
-            }
-        }
-
-        return servingCell;
-    }
-
-    /**
-     * Returns the small cell (femto or pico) that serves with the best SINR,
-     *
-     * @return The small cell with higher SINR
-     */
-    public Cell getSmallCellWithHigherSINR() {
-        double sinr;
-        Map<Double, Double> maxSINR = new TreeMap<>();
-        Map<Double, Cell> servingBTSs = new TreeMap<>();
-        Cell servingCell = null;
-
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            maxSINR.put(frequency, Double.NEGATIVE_INFINITY);
-        }
-
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            for (Cell c : udn_.cells_.get(frequency)) {
-
-                if (c.isActive() && ((c.getType().toString().equalsIgnoreCase("PICO")) || (c.getType().toString().equalsIgnoreCase("FEMTO")))) {
-                    sinr = this.computeSINR(c);
-
-                    //quality, regardless of the cell activation
-                    if (sinr > maxSINR.get(frequency)) {
-                        maxSINR.put(frequency, sinr);
-                        servingBTSs.put(frequency, c);
-                    }
-                }
-            }
-        }//for
-
-        //retrieve the best among the precomputed values
-        double maxValue = Double.NEGATIVE_INFINITY;
-        for (Double f : servingBTSs.keySet()) {
-            sinr = maxSINR.get(f);
-            if (sinr > maxValue) {
-                maxValue = sinr;
-                servingCell = servingBTSs.get(f);
             }
         }
 
@@ -363,15 +296,14 @@ public class Point {
      *
      * @return Sorted cells
      */
-    public SortedMap<Double, Cell> getCellsWithBestSINRs() {
-        //create the comparator for the sortedlist
-        Comparator<Double> cellSINRComparator = (sinr1, sinr2) -> Double.compare(sinr2, sinr1);
-
+    public SortedMap<Double, Cell> getCellsWithBestSNRs() {
+        // Create the comparator for the sortedlist
+        Comparator<Double> cellSINRComparator = (snr1, snr2) -> Double.compare(snr2, snr1);
         SortedMap<Double, Cell> sortedCells = new TreeMap<>(cellSINRComparator);
 
-        for (Double frequency : this.udn_.cells_.keySet()) {
-            for (Cell c : udn_.cells_.get(frequency)) {
-                sortedCells.put(this.computeSINR(c), c);
+        for (Double frequency : udn.getCells().keySet()) {
+            for (Cell c : udn.getCells().get(frequency)) {
+                sortedCells.put(computeSNR(c), c);
             }
         }
 
@@ -379,31 +311,31 @@ public class Point {
     }
 
     Map<Double, Double> getTotalReceivedPower() {
-        return this.totalReceivedPower_;
+        return this.totalReceivedPower;
     }
 
     public boolean hasBTSInstalled() {
-        return !installedBTS_.isEmpty();
+        return !installedBTS.isEmpty();
     }
 
     public boolean hasBTSInstalled(double workingFrequency) {
-        return installedBTS_.containsKey(workingFrequency);
+        return installedBTS.containsKey(workingFrequency);
     }
 
     public void addInstalledBTS(double workingFrequency, BTS bts) {
-        if (!installedBTS_.containsKey(workingFrequency)) {
-            installedBTS_.put(workingFrequency, bts);
+        if (!installedBTS.containsKey(workingFrequency)) {
+            installedBTS.put(workingFrequency, bts);
         }
     }
 
     public Map<Double, BTS> getInstalledBTS() {
-        return this.installedBTS_;
+        return this.installedBTS;
     }
 
     public List<Cell> getCells() {
         List<Cell> cells = new ArrayList<>();
 
-        installedBTS_.keySet().forEach(d -> installedBTS_.get(d).getSectors().forEach(sector -> cells.addAll(sector.getCells())));
+        installedBTS.keySet().forEach(d -> installedBTS.get(d).getSectors().forEach(sector -> cells.addAll(sector.getCells())));
 
         return cells;
     }
@@ -411,11 +343,10 @@ public class Point {
     public List<Cell> getActiveCells() {
         List<Cell> activeCells = new ArrayList<>();
 
-        for (double d : installedBTS_.keySet()) {
-            for (Sector sector : installedBTS_.get(d).getSectors()) {
+        for (double d : installedBTS.keySet()) {
+            for (Sector sector : installedBTS.get(d).getSectors()) {
                 for (Cell cell : sector.getCells()) {
-                    if (cell.isActive())
-                        activeCells.add(cell);
+                    if (cell.isActive()) activeCells.add(cell);
                 }
             }
         }
@@ -424,6 +355,6 @@ public class Point {
     }
 
     public int[] getPoint2D() {
-        return new int[]{this.x_, this.y_};
+        return new int[]{this.x, this.y};
     }
 }

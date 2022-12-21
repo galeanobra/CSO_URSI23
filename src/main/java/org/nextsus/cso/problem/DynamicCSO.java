@@ -201,7 +201,7 @@ public class DynamicCSO extends CSO {
 
         //go through all the cells which does have users connected, and restart adyacent BTSs
         Random r = new Random();
-        for (List<Cell> cells : udn_.cells_.values()) {
+        for (List<Cell> cells : udn_.cells.values()) {
             for (Cell c : cells) {
                 if (c.getAssignedUsers() > 0) {
                     BTS b = c.getBTS();
@@ -243,15 +243,15 @@ public class DynamicCSO extends CSO {
     }
 
     private boolean checkLimitX(int v) {
-        return (v >= 0) && (v < udn_.gridPointsX_);
+        return (v >= 0) && (v < udn_.gridPointsX);
     }
 
     private boolean checkLimitY(int v) {
-        return (v >= 0) && (v < udn_.gridPointsY_);
+        return (v >= 0) && (v < udn_.gridPointsY);
     }
 
     private boolean checkLimitZ(int v) {
-        return (v >= 0) && (v < udn_.gridPointsZ_);
+        return (v >= 0) && (v < udn_.gridPointsZ);
     }
 
     @Override

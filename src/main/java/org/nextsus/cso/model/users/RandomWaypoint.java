@@ -51,7 +51,7 @@ public class RandomWaypoint extends MobilityModel {
             actual[2] = 0;
 
             if (targetPosition(u, actual)) {    // If the user arrives the destination point
-                u.setVelocity(new double[]{(maxV_ - minV_) * UDN.random_.nextDouble() + minV_, (maxV_ - minV_) * UDN.random_.nextDouble() + minV_, (maxV_ - minV_) * UDN.random_.nextDouble() + minV_});
+                u.setVelocity(new double[]{(maxV_ - minV_) * UDN.random.nextDouble() + minV_, (maxV_ - minV_) * UDN.random.nextDouble() + minV_, (maxV_ - minV_) * UDN.random.nextDouble() + minV_});
 
                 u.setX_t(udn.getRandom().nextInt(udn.getGrid().length));
                 u.setY_t(udn.getRandom().nextInt(udn.getGrid()[0].length));

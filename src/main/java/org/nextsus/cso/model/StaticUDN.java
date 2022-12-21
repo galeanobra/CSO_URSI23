@@ -9,7 +9,6 @@ import org.nextsus.cso.model.cells.BTS;
 import org.nextsus.cso.model.users.User;
 import org.nextsus.cso.util.PPP;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -32,10 +31,10 @@ public class StaticUDN extends UDN implements Serializable {
         super(mainConfigFile, scenario, run);
 
         //load Users info
-        loadUsers(staticUserConfigFile_, scenario);
+        loadUsers(staticUserConfigFile, scenario);
 
         //load hethetnet config
-        loadHetHetNetConfig(hetNetConfigFile_);
+        loadHetHetNetConfig(hetNetConfigFile);
     }
 
     /**
@@ -55,14 +54,14 @@ public class StaticUDN extends UDN implements Serializable {
             System.exit(-1);
         }
 
-        this.usersTypes_ = Integer.parseInt(pro.getProperty("numUserTypes"));
-        this.usersConfig_ = new ArrayList<>();
-        for (int i = 0; i < this.usersTypes_; i++) {
-            this.usersConfig_.add("/scenarios/" + scenario + "/" + pro.getProperty("userType" + i));
+        this.usersTypes = Integer.parseInt(pro.getProperty("numUserTypes"));
+        this.usersConfig = new ArrayList<>();
+        for (int i = 0; i < this.usersTypes; i++) {
+            this.usersConfig.add("/scenarios/" + scenario + "/" + pro.getProperty("userType" + i));
         }
 
-        this.users_ = new ArrayList<>();
-        loadUserConfig(this.users_, this.usersConfig_);
+        this.users = new ArrayList<>();
+        loadUserConfig(this.users, this.usersConfig);
     }
 
     /**
@@ -74,7 +73,7 @@ public class StaticUDN extends UDN implements Serializable {
     private void loadUserConfig(List<User> users, List<String> configs) {
         //variables
         Properties pro = new Properties();
-        PPP ppp = new PPP(DynamicUDN.random_);
+        PPP ppp = new PPP(DynamicUDN.random);
 
         int numFemtoAntennas;
         int numPicoAntennas;
@@ -105,7 +104,7 @@ public class StaticUDN extends UDN implements Serializable {
             int numUsers = Integer.parseInt(pro.getProperty("numUsers", "10"));
             //int numUsers = 15;
             double lambda = Double.parseDouble(pro.getProperty("lambdaForPPP", "50"));
-            double mu = this.gridPointsY_ * this.gridPointsX_ * this.interPointSeparation_ * this.interPointSeparation_;
+            double mu = this.gridPointsY * this.gridPointsX * this.interPointSeparation * this.interPointSeparation;
             mu = mu / (1000000.0);
             //uncomment for PPP distributions
             numUsers = ppp.getPoisson(lambda * mu);
@@ -114,11 +113,11 @@ public class StaticUDN extends UDN implements Serializable {
             int deployedUsers = 0;
             while (deployedUsers < numUsers) {
                 //randomize the position
-                int x = random_.nextInt(gridPointsX_);
-                int y = random_.nextInt(gridPointsY_);
+                int x = random.nextInt(gridPointsX);
+                int y = random.nextInt(gridPointsY);
                 //check if there is a BTS installed in any of the points
                 boolean hasBTS = false;
-                for (int z = 0; z < this.gridPointsZ_; z++) {
+                for (int z = 0; z < this.gridPointsZ; z++) {
                     if (grid[x][y][z].hasBTSInstalled()) {
                         hasBTS = true;
                         break;
@@ -147,19 +146,19 @@ public class StaticUDN extends UDN implements Serializable {
 
         System.out.println("Generating Social Attractors...");
 
-        if ((this.users_ == null) || (this.users_.size() == 0)) {
+        if ((this.users == null) || (this.users.size() == 0)) {
             System.out.println("Error generating social attractors. Missing users info.");
         }
-        int numberOfSAs = this.users_.size() / 10;
+        int numberOfSAs = this.users.size() / 10;
         System.out.println("\tNumber of SAs: " + numberOfSAs);
 
-        socialAttractors_ = new ArrayList<>();
+        socialAttractors = new ArrayList<>();
         for (int sa = 0; sa < numberOfSAs; sa++) {
             //randomize the position
-            int x = random_.nextInt(gridPointsX_);
-            int y = random_.nextInt(gridPointsY_);
-            int z = random_.nextInt(gridPointsZ_);
-            socialAttractors_.add(new SocialAttractor(sa, x, y, z));
+            int x = random.nextInt(gridPointsX);
+            int y = random.nextInt(gridPointsY);
+            int z = random.nextInt(gridPointsZ);
+            socialAttractors.add(new SocialAttractor(sa, x, y, z));
         }
     }
 
@@ -183,8 +182,8 @@ public class StaticUDN extends UDN implements Serializable {
             System.exit(-1);
         }
 
-        this.alphaHetHetNet_ = Double.parseDouble(pro.getProperty("alpha", "0.1"));
-        this.meanBetaHetHetNet_ = Double.parseDouble(pro.getProperty("meanBeta", "0.1"));
+        this.alphaHetHetNet = Double.parseDouble(pro.getProperty("alpha", "0.1"));
+        this.meanBetaHetHetNet = Double.parseDouble(pro.getProperty("meanBeta", "0.1"));
 
         generateSocialAttractors();
 
@@ -199,17 +198,17 @@ public class StaticUDN extends UDN implements Serializable {
      */
     public void hetHetNet() {
         // Move every SA towards its closest BTS in terms of the received signal power, by a factor of alpha
-        for (SocialAttractor sa : this.socialAttractors_) {
+        for (SocialAttractor sa : this.socialAttractors) {
             Point p = getGridPoint(sa.getX(), sa.getY(), sa.getZ());
             BTS b = p.getCellWithHigherReceivingPower().getBTS();
-            sa.moveSATowardsBTS(b, this.alphaHetHetNet_);
+            sa.moveSATowardsBTS(b, this.alphaHetHetNet);
         }
 
         // Move every user towards its closest SA in terms of the Euclidean distance, by a factor of beta
-        for (User u : this.users_) {
+        for (User u : this.users) {
             Point p = getGridPoint(u.getX(), u.getY(), u.getZ());
             SocialAttractor sa = p.getClosestSA(this);
-            u.moveUserTowardsSA(sa, this, this.meanBetaHetHetNet_);
+            u.moveUserTowardsSA(sa, this, this.meanBetaHetHetNet);
         }
     }
 }

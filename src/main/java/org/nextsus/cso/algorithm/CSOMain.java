@@ -66,7 +66,7 @@ public class CSOMain {
             case "mocell" -> new HybridMOCell<>(problem, numEvals, popSize, new CrowdingDistanceArchive<>(popSize), new C9<>((int) Math.sqrt(popSize), (int) Math.sqrt(popSize)), crossover, mutation, selection, new SequentialSolutionListEvaluator<>());
             case "moead" -> new HybridMOEAD<>(problem, popSize, popSize, numEvals, mutation, crossover, AbstractMOEAD.FunctionType.TCHE, "", 0.1, 2, 20);
             case "smsemoa" -> new HybridSMSEMOA<>(problem, numEvals, popSize, 100.0, crossover, mutation, selection, new DefaultDominanceComparator<>(), new PISAHypervolume<>());
-//            case "sparseea" -> new HybridSparseEA<>(problem, numEvals, popSize, crossoverProbability, mutationProbability, new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>()), problem.getTotalNumberOfActivableCells());
+            case "sparseea" -> new HybridSparseEA<>(problem, numEvals, popSize, crossoverProbability, mutationProbability, new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>()), ((StaticCSO) problem).getTotalNumberOfActivableCells());
             default -> new HybridNSGAII<>(problem, numEvals, popSize, popSize, popSize, crossover, mutation, selection, new DefaultDominanceComparator<>(), new SequentialSolutionListEvaluator<>());
         };
 
@@ -75,20 +75,19 @@ public class CSOMain {
         List<BinaryCSOSolution> population = algorithm.getResult();
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
-        String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID : "out/" + name + "/FUN/" + name + ".FUN." + taskID + "." + jobID;
-        String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID : "out/" + name + "/VAR/" + name + ".VAR." + taskID + "." + jobID;
+        String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID : "out/" + name + "/FUN/" + name + ".FUN." + taskID + "." + jobID + ".csv";
+        String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID : "out/" + name + "/VAR/" + name + ".VAR." + taskID + "." + jobID + ".csv";
 
         // For local debug, comment previous lines and uncomment these
 //        String FUN = "FUN_" + taskID + ".csv";
 //        String VAR = "VAR_" + taskID + ".csv";
 
-        new SolutionListOutput(population).setVarFileOutputContext(new DefaultFileOutputContext("VAR_" + args[0] + ".csv", ",")).setFunFileOutputContext(new DefaultFileOutputContext("FUN_" + args[0] + ".csv", ",")).print();
+        new SolutionListOutput(population).setVarFileOutputContext(new DefaultFileOutputContext(VAR, ",")).setFunFileOutputContext(new DefaultFileOutputContext(FUN, ",")).print();
 
         System.out.println("Total execution time: " + algorithmRunner.getComputingTime() + "ms");
         System.out.println("Objectives values have been written to file " + FUN);
         System.out.println("Variables values have been written to file " + VAR);
-
-        System.out.println("\n# Execution completed #");
+        System.out.println("# Execution completed #");
 
 //        PlotFront plot = new Plot3D(new ArrayFront(population).getMatrix(), problem.getName() + " (NSGA-II)");
 //        plot.plot();

@@ -40,13 +40,13 @@ public class DynamicUDN extends UDN implements Serializable {
     public DynamicUDN(String mainConfigFile, String scenario, int run) {
         super(mainConfigFile, scenario, run);
 
-        if (!mobilityType_.equalsIgnoreCase("randomWaypoint")) {
+        if (!mobilityType.equalsIgnoreCase("randomWaypoint")) {
             //Opens the matlab file only once
             MatFileReader users_reader = null;
 
             //reading input from Matlab file
             try {
-                users_reader = new MatFileReader(this.mobilityMatrixFile_);
+                users_reader = new MatFileReader(this.mobilityMatrixFile);
             } catch (IOException ex) {
                 Logger.getLogger(DynamicUDN.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -56,18 +56,18 @@ public class DynamicUDN extends UDN implements Serializable {
         }
 
         //load Users info
-        if (this.mobilityType_.equalsIgnoreCase("matrix"))
-            loadDynamicUsers(this.dynamicUserConfigFile_, false);
-        else if (this.mobilityType_.equalsIgnoreCase("userDemands"))
-            loadDynamicUsers(this.dynamicUserConfigFile_, true);
-        else if (this.mobilityType_.equalsIgnoreCase("randomWaypoint")) {
+        if (this.mobilityType.equalsIgnoreCase("matrix"))
+            loadDynamicUsers(this.dynamicUserConfigFile, false);
+        else if (this.mobilityType.equalsIgnoreCase("userDemands"))
+            loadDynamicUsers(this.dynamicUserConfigFile, true);
+        else if (this.mobilityType.equalsIgnoreCase("randomWaypoint")) {
             mobilityModel = new RandomWaypoint(this, mobilityConfigFile);
-            loadDynamicUsers(this.dynamicUserConfigFile_, false);
-        } else if (this.mobilityType_.equalsIgnoreCase("shanghai")) {
-            loadDynamicUsers(this.dynamicUserConfigFile_, false);
+            loadDynamicUsers(this.dynamicUserConfigFile, false);
+        } else if (this.mobilityType.equalsIgnoreCase("shanghai")) {
+            loadDynamicUsers(this.dynamicUserConfigFile, false);
             shanghaiMobility_ = true;
         } else {
-            System.out.println("Incorrect mobility type: " + this.mobilityType_);
+            System.out.println("Incorrect mobility type: " + this.mobilityType);
             System.exit(-1);
         }
     }
@@ -85,15 +85,15 @@ public class DynamicUDN extends UDN implements Serializable {
             pro.load(new FileInputStream(configFile));
             System.out.println(configFile);
 
-            this.usersTypes_ = Integer.parseInt(pro.getProperty("numDynamicUserTypes"));
-            this.usersConfig_ = new ArrayList<>();
+            this.usersTypes = Integer.parseInt(pro.getProperty("numDynamicUserTypes"));
+            this.usersConfig = new ArrayList<>();
 
-            for (int i = 0; i < this.usersTypes_; i++)
-                this.usersConfig_.add(pro.getProperty("userType" + i));
+            for (int i = 0; i < this.usersTypes; i++)
+                this.usersConfig.add(pro.getProperty("userType" + i));
 
             //generate users
-            this.users_ = new ArrayList<>();
-            loadDynamicUserConfig(this.users_, this.usersConfig_, demands);
+            this.users = new ArrayList<>();
+            loadDynamicUserConfig(this.users, this.usersConfig, demands);
 
         } catch (IOException e) {
             System.out.println(e + "Error loading properties: " + configFile);
@@ -110,7 +110,7 @@ public class DynamicUDN extends UDN implements Serializable {
     private void loadDynamicUserConfig(List<User> users, List<String> configs, boolean demands) {
         //variables
         Properties pro = new Properties();
-        PPP ppp = new PPP(DynamicUDN.random_);
+        PPP ppp = new PPP(DynamicUDN.random);
 
         int id = 0;
         int numUsers;
@@ -137,7 +137,7 @@ public class DynamicUDN extends UDN implements Serializable {
 
             //load number of users in the network
             double lambda = Double.parseDouble(pro.getProperty("lambdaForPPP"));
-            double mu = this.gridPointsY_ * this.gridPointsX_ * this.interPointSeparation_ * this.interPointSeparation_;
+            double mu = this.gridPointsY * this.gridPointsX * this.interPointSeparation * this.interPointSeparation;
             mu = mu / (1000000.0);
             //uncomment for PPP distributions
             numUsers = ppp.getPoisson(lambda * mu);
@@ -166,7 +166,7 @@ public class DynamicUDN extends UDN implements Serializable {
                 }
 
                 int x, y, z;
-                if (!mobilityType_.equals("randomWaypoint")) {
+                if (!mobilityType.equals("randomWaypoint")) {
                     MLNumericArray V_Time = (MLNumericArray) VS_Node_.getField("V_TIME", u);
                     MLNumericArray V_Position_X = (MLNumericArray) VS_Node_.getField("V_POSITION_X", u);
                     MLNumericArray V_Position_Y = (MLNumericArray) VS_Node_.getField("V_POSITION_Y", u);
@@ -184,10 +184,10 @@ public class DynamicUDN extends UDN implements Serializable {
                         hasBTS = false;
 
                         //randomize the position
-                        x = random_.nextInt(gridPointsX_);
-                        y = random_.nextInt(gridPointsY_);
+                        x = random.nextInt(gridPointsX);
+                        y = random.nextInt(gridPointsY);
                         //check if there is a BTS installed in any of the points
-                        for (int i = 1; i < this.gridPointsZ_; i++) {
+                        for (int i = 1; i < this.gridPointsZ; i++) {
                             if (grid[x][y][i].hasBTSInstalled()) {
                                 hasBTS = true;
                                 break;
@@ -212,11 +212,11 @@ public class DynamicUDN extends UDN implements Serializable {
                         numMacroAntennas
                 );
 
-                if (mobilityType_.equalsIgnoreCase("randomWaypoint")) {
+                if (mobilityType.equalsIgnoreCase("randomWaypoint")) {
                     double minV = mobilityModel.getMinV_();
                     double maxV = mobilityModel.getMaxV_();
 
-                    user.setVelocity(new double[]{(maxV - minV) * UDN.random_.nextDouble() + minV, (maxV - minV) * UDN.random_.nextDouble() + minV, (maxV - minV) * UDN.random_.nextDouble() + minV});
+                    user.setVelocity(new double[]{(maxV - minV) * UDN.random.nextDouble() + minV, (maxV - minV) * UDN.random.nextDouble() + minV, (maxV - minV) * UDN.random.nextDouble() + minV});
                     user.setX_t(getRandom().nextInt(getGrid().length));
                     user.setY_t(getRandom().nextInt(getGrid()[0].length));
                     user.setZ_t(getRandom().nextInt(getGrid()[0][0].length));
@@ -238,7 +238,7 @@ public class DynamicUDN extends UDN implements Serializable {
      */
     public boolean updateUsersPositionFromMatrix(int time) {
         boolean modified = false;
-        int numUsers = this.users_.size();
+        int numUsers = this.users.size();
 
         //looking for changes in the positions
         for (int k = 0; k < numUsers; k++) {
@@ -262,9 +262,9 @@ public class DynamicUDN extends UDN implements Serializable {
                     int z = Math.round(zf);
 
                     //modify the user's position
-                    this.users_.get(k).setX(x);
-                    this.users_.get(k).setY(y);
-                    this.users_.get(k).setZ(z);
+                    this.users.get(k).setX(x);
+                    this.users.get(k).setY(y);
+                    this.users.get(k).setZ(z);
 
 //                    System.out.println("The user " + k + " has changed his position");
 //                    System.out.println("time= " + time + ", Position= (" + x + "," + y + "," + z + ")");
@@ -283,7 +283,7 @@ public class DynamicUDN extends UDN implements Serializable {
      * @return
      */
     public void updateUsersPositionFromModel() {
-        for (User u : users_)
+        for (User u : users)
             mobilityModel.move(u);
 
         /*List<User> aux = new LinkedList<>(users_);
@@ -299,7 +299,7 @@ public class DynamicUDN extends UDN implements Serializable {
 
     public boolean updateUsersPositionShanghai(int time) {  //TODO Break at the end of the loop
         boolean modified = false;
-        int numUsers = this.users_.size();
+        int numUsers = this.users.size();
 
         int initTime = 150; //movement in shanghai does not start in 0
         //looking for changes in the positions
@@ -318,14 +318,14 @@ public class DynamicUDN extends UDN implements Serializable {
 
             //if user is not active, deactivate it
             if (xf == 0 && yf == 0 && z == 0)
-                this.users_.get(k).deactivateUser();
+                this.users.get(k).deactivateUser();
             else {
                 modified = true;
-                this.users_.get(k).setX(x);
-                this.users_.get(k).setY(y);
+                this.users.get(k).setX(x);
+                this.users.get(k).setY(y);
                 //randomize z
-                z = this.getRandom().nextInt(gridPointsZ_);
-                this.users_.get(k).setZ(z);
+                z = this.getRandom().nextInt(gridPointsZ);
+                this.users.get(k).setZ(z);
             }
             //modify the user's position
             break;
@@ -363,7 +363,7 @@ public class DynamicUDN extends UDN implements Serializable {
      */
     public int getNumberOfActiveUsers() {
         int activeUsers = 0;
-        for (User u : this.users_) {
+        for (User u : this.users) {
             if (u.isActive())
                 activeUsers++;
         }
@@ -377,7 +377,7 @@ public class DynamicUDN extends UDN implements Serializable {
      */
     public int getNumberOfHeavyUsers() {
         int heavyUsers = 0;
-        for (User u : this.users_) {
+        for (User u : this.users) {
             if (u.isActive() & (u.getUserTypename().equals("heavy"))) {
                 //if(u.getUserTypename()=="heavy"){
                 heavyUsers++;
@@ -392,7 +392,7 @@ public class DynamicUDN extends UDN implements Serializable {
      * @param time Instant time
      */
     public void updateUsersActivation(int time) {
-        int numUsers = this.users_.size();
+        int numUsers = this.users.size();
         double currentActivity = this.getUserActivity(time);
         int must = (int) (numUsers * currentActivity);
         int usersToUpdate = ((int) (numUsers * currentActivity)) - getNumberOfActiveUsers();
@@ -402,11 +402,11 @@ public class DynamicUDN extends UDN implements Serializable {
         //System.out.println("NUM ACTIVE USERS BEFORE: " + this.getNumberOfActiveUsers());
 
         if (usersToUpdate < 0) { //A set of users must be deactivated
-            rnd.nextInt(this.users_.size());
+            rnd.nextInt(this.users.size());
             while (count < Math.abs(usersToUpdate)) {
                 //TODO find a better way: too inneficient
-                for (User u : this.users_) {
-                    if (u.isActive() & (u.getID() == (rnd.nextInt(this.users_.size())))) {
+                for (User u : this.users) {
+                    if (u.isActive() & (u.getID() == (rnd.nextInt(this.users.size())))) {
                         u.deactivateUser();
                         count++;
                     }
@@ -415,8 +415,8 @@ public class DynamicUDN extends UDN implements Serializable {
         } else if (usersToUpdate > 0) { //A set of users must be activated
             while (count < Math.abs(usersToUpdate)) {
                 //TODO find a better way: too inneficient
-                for (User u : this.users_) {
-                    if (!u.isActive() & (u.getID() == (rnd.nextInt(this.users_.size())))) {
+                for (User u : this.users) {
+                    if (!u.isActive() & (u.getID() == (rnd.nextInt(this.users.size())))) {
                         u.activateUser();
                         count++;
                     }

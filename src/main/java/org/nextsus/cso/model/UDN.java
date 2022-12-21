@@ -11,7 +11,6 @@ import org.nextsus.cso.model.cells.Sector;
 import org.nextsus.cso.model.users.User;
 import org.nextsus.cso.util.PPP;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -27,25 +26,25 @@ public abstract class UDN {
     /**
      * Misc
      */
-    public static Random random_;
-    static long seed_;
+    public static Random random;
+    static long seed;
 
     //terrain parameters
-    public int gridPointsX_;
-    public int gridPointsY_;
-    public int gridPointsZ_;
-    public Map<Double, List<Cell>> cells_;
-    public Map<Double, List<BTS>> btss_;
+    public int gridPointsX;
+    public int gridPointsY;
+    public int gridPointsZ;
+    public Map<Double, List<Cell>> cells;
+    public Map<Double, List<BTS>> btss;
     public List<Integer[]> cellOrder;
     public Map<Point, Map<Double, List<Cell>>> cellsOfInterestByPoint;
     public double signalPowerThreshold = -90; // 0.000000000001;    // 1 pW
 
     //Users
-    int usersTypes_;
-    List<String> usersConfig_;
-    int interPointSeparation_;
-    int terrainWidth_;
-    int terrainHeight_;
+    int usersTypes;
+    List<String> usersConfig;
+    int interPointSeparation;
+    int terrainWidth;
+    int terrainHeight;
 
     Point[][][] grid;
 
@@ -54,28 +53,28 @@ public abstract class UDN {
     /**
      * Propagation parameters
      */
-    int numPropagationRegions_;
-    List<Region> propRegions_;
+    int numPropagationRegions;
+    List<Region> propRegions;
 
     /**
      * Social Attractors
      */
-    List<SocialAttractor> socialAttractors_;
-    double alphaHetHetNet_;
-    double meanBetaHetHetNet_;
+    List<SocialAttractor> socialAttractors;
+    double alphaHetHetNet;
+    double meanBetaHetHetNet;
     /**
      * Users
      */
-    List<User> users_;
+    List<User> users;
     long[] seeds_array = {6576946, 15806277, 10306509, 561099, 16435990, 1904859, 4080598, 16030968, 24070723, 5330056, 6787642, 11449375, 1801157, 11115944, 10621377, 14089326, 23581748, 12652207, 22237788, 1781623, 18336580, 22180257, 14134887, 9970106, 5431969, 24679879, 544331, 13649575, 15359920, 7049695, 15520211, 13756445, 7986543, 21061943, 10101328, 19447250, 5018584, 25009560, 16699832, 10563679, 7488476, 2692010, 17385187, 2484487, 12358331, 10457156, 22266884, 18504290, 5847318, 23121394, 54651432, 77546760, 97451320, 56328192, 39697568, 52408352, 84276000, 77263600, 46891340, 49417580, 93248320, 50346648, 57642204, 68574440, 54368272, 96986784, 39131252, 39878944, 37635864, 44365104, 75586840, 84740536, 94460544, 65300512, 82780616, 81749760, 33432864, 38383556, 42122024, 30906626, 64552820, 85023696, 75020520, 53620580, 99229864, 32402012, 60066660, 98482168, 34645092, 53337420, 48669888, 95491400, 43617408, 77829920, 78011296, 44648260, 56146820, 73060600, 40909796, 67362216};
     //Filenames of the configuration files
-    String cellConfigFile_;
-    String hetNetConfigFile_;
-    String staticUserConfigFile_;
-    String mobilityType_;
-    String dynamicUserConfigFile_;
+    String cellConfigFile;
+    String hetNetConfigFile;
+    String staticUserConfigFile;
+    String mobilityType;
+    String dynamicUserConfigFile;
     String mobilityConfigFile;
-    String mobilityMatrixFile_;
+    String mobilityMatrixFile;
     String operatorsFile;
     String binaryMatrixFile;
     double lastfreq;
@@ -87,14 +86,14 @@ public abstract class UDN {
      * @param run            The run to generate the same problem instances
      */
     public UDN(String mainConfigFile, String scenario, int run) {
-        //load cell configurations
+        // Load cell configurations
         this.loadMainParameters(mainConfigFile);
 
-        //random number
+        // Random seed if run == -1
         if (run == -1) {
-            random_ = new Random();
+            random = new Random();
         } else {
-            random_ = new Random(this.seeds_array[run]);
+            random = new Random(this.seeds_array[run]);
         }
 
 //        // TFM
@@ -116,30 +115,30 @@ public abstract class UDN {
 //            e.printStackTrace();
 //        }
 
-        //Generate the grid
-        grid = new Point[gridPointsX_][gridPointsY_][gridPointsZ_];
-        for (int i = 0; i < gridPointsX_; i++) {
-            grid[i] = new Point[gridPointsY_][];
-            for (int j = 0; j < gridPointsY_; j++) {
+        // Generate the grid
+        grid = new Point[gridPointsX][gridPointsY][gridPointsZ];
+        for (int i = 0; i < gridPointsX; i++) {
+            grid[i] = new Point[gridPointsY][];
+            for (int j = 0; j < gridPointsY; j++) {
                 //grid[i][j] = new Point(i*this.interPointSeparation_, j*this.interPointSeparation_, 0);
-                grid[i][j] = new Point[gridPointsZ_];
-                for (int k = 0; k < gridPointsZ_; k++) {
+                grid[i][j] = new Point[gridPointsZ];
+                for (int k = 0; k < gridPointsZ; k++) {
                     grid[i][j][k] = new Point(this, i, j, k);
                 }
             }
         }
 
-        //Generate the propagations regions and the Voronoi partition
-        propRegions_ = new ArrayList<>();
-        for (int i = 0; i < numPropagationRegions_; i++) {
-            int x = random_.nextInt(gridPointsX_);
-            int y = random_.nextInt(gridPointsY_);
-            propRegions_.add(new Region(i, x, y));
+        // Generate the propagations regions and the Voronoi partition
+        propRegions = new ArrayList<>();
+        for (int i = 0; i < numPropagationRegions; i++) {
+            int x = random.nextInt(gridPointsX);
+            int y = random.nextInt(gridPointsY);
+            propRegions.add(new Region(i, x, y));
         }
-        computeVoronoiPropagationRegion(propRegions_);
+        computeVoronoiPropagationRegion(propRegions);
 
-        //load cells
-        loadCells(cellConfigFile_, scenario);
+        // Load cells
+        loadCells(cellConfigFile, scenario);
     }
 
     /**
@@ -159,23 +158,23 @@ public abstract class UDN {
             System.exit(-1);
         }
 
-        this.gridPointsX_ = Integer.parseInt(pro.getProperty("gridPointsX"));
-        this.gridPointsY_ = Integer.parseInt(pro.getProperty("gridPointsY"));
-        this.gridPointsZ_ = Integer.parseInt(pro.getProperty("gridPointsZ"));
-        this.interPointSeparation_ = Integer.parseInt(pro.getProperty("interPointSeparation"));
-        terrainWidth_ = gridPointsX_ * interPointSeparation_;
-        terrainHeight_ = gridPointsY_ * interPointSeparation_;
-        seed_ = Long.parseLong(pro.getProperty("seed", "2889123676182312233221"));
-        this.numPropagationRegions_ = Integer.parseInt(pro.getProperty("propagationRegions"));
+        this.gridPointsX = Integer.parseInt(pro.getProperty("gridPointsX"));
+        this.gridPointsY = Integer.parseInt(pro.getProperty("gridPointsY"));
+        this.gridPointsZ = Integer.parseInt(pro.getProperty("gridPointsZ"));
+        this.interPointSeparation = Integer.parseInt(pro.getProperty("interPointSeparation"));
+        terrainWidth = gridPointsX * interPointSeparation;
+        terrainHeight = gridPointsY * interPointSeparation;
+        seed = Long.parseLong(pro.getProperty("seed", "2889123676182312233221"));
+        this.numPropagationRegions = Integer.parseInt(pro.getProperty("propagationRegions"));
         this.binaryMatrixFile = pro.getProperty("binaryMatrixFile");
-        this.cellConfigFile_ = pro.getProperty("cellConfigFile");
+        this.cellConfigFile = pro.getProperty("cellConfigFile");
         this.operatorsFile = pro.getProperty("operatorsFile");
-        this.hetNetConfigFile_ = pro.getProperty("hetNetConfigFile");
-        this.staticUserConfigFile_ = pro.getProperty("staticUserConfigFile");
-        this.mobilityType_ = pro.getProperty("mobility");
-        this.dynamicUserConfigFile_ = pro.getProperty("dynamicUserConfigFile");
+        this.hetNetConfigFile = pro.getProperty("hetNetConfigFile");
+        this.staticUserConfigFile = pro.getProperty("staticUserConfigFile");
+        this.mobilityType = pro.getProperty("mobility");
+        this.dynamicUserConfigFile = pro.getProperty("dynamicUserConfigFile");
         this.mobilityConfigFile = pro.getProperty("mobilityConfigFile");
-        this.mobilityMatrixFile_ = pro.getProperty("matrixFile");
+        this.mobilityMatrixFile = pro.getProperty("matrixFile");
     }
 
     /**
@@ -198,8 +197,8 @@ public abstract class UDN {
 
         int numberOfCellTypes = Integer.parseInt(pro.getProperty("cellTypes", "3"));
 
-        this.cells_ = new HashMap<>();
-        this.btss_ = new HashMap<>();
+        this.cells = new HashMap<>();
+        this.btss = new HashMap<>();
         this.cellOrder = new ArrayList<>();
         this.lastfreq = 0;
 
@@ -247,15 +246,14 @@ public abstract class UDN {
         //load the number of cells of with this configuration
         int numCells = Integer.parseInt(pro.getProperty("numCells", "10"));
         double lambda = Double.parseDouble(pro.getProperty("lambdaForPPP", "50"));
-        double mu = this.gridPointsY_ * this.gridPointsX_ * this.interPointSeparation_ * this.interPointSeparation_;
+        double mu = this.gridPointsY * this.gridPointsX * this.interPointSeparation * this.interPointSeparation;
         mu = mu / (1000000.0);
 
         //uncomment for PPP distributions
-        PPP ppp = new PPP(random_);
+        PPP ppp = new PPP(random);
         int numBtss = ppp.getPoisson(lambda * mu);
-        numBtss = (int) Math.ceil(numBtss / (numSectors * numChainsTX));
-        //int numBtss = (int) Math.ceil(lambda*mu);
-        //numBtss = numCells;
+        numBtss = (int) Math.ceil((double) numBtss / (numSectors * numChainsTX));
+
         if (cellTypeName.equals("macro")) {
             numBtss = 0;
         }
@@ -268,7 +266,7 @@ public abstract class UDN {
 
         //add antennas of new type in already existing positions
         if (lastfreq != 0) {
-            for (BTS b : btss_.get(lastfreq)) {
+            for (BTS b : this.btss.get(lastfreq)) {
                 //create a new BTS of the current frequency in this point
                 int x, y, z;
                 x = b.getX();
@@ -281,10 +279,17 @@ public abstract class UDN {
 
                 //set cell (RF Chain) angle shift depending on BTS and antenna array configuration
                 int cellIndex = 0;
+                int initialDegree = random.nextInt(360);
+                int angleShift = 360 / totalRFChains;
                 for (Sector sector : bts.getSectors()) {
                     for (Cell cell : sector.getCells()) {
                         cell.setSector(sector);
-                        cell.setAngleShift(cellIndex * (360 / totalRFChains));
+
+                        if (cellIndex == 0) {
+                            cell.setAngleShift(initialDegree);
+                        } else {
+                            cell.setAngleShift(((cellIndex * angleShift) + initialDegree) % 360);
+                        }
 
                         cell.setSingularValuesH(singularValuesH);
 
@@ -301,13 +306,12 @@ public abstract class UDN {
                     break;
                 }
             }
-
         }//if
 
         for (int c = btss.size(); c < numBtss; c++) {
             int x, y, z;
-            x = random_.nextInt(gridPointsX_);
-            y = random_.nextInt(gridPointsY_);
+            x = random.nextInt(gridPointsX);
+            y = random.nextInt(gridPointsY);
 
             //height = 5m for femto and pico and 10 m for micro and macro
             z = (cellTypeName.equalsIgnoreCase("femto") || cellTypeName.equalsIgnoreCase("pico")) ? 1 : 2;
@@ -318,10 +322,18 @@ public abstract class UDN {
 
             //set cell (RF Chain) angle shift depending on BTS and antenna array configuration
             int cellIndex = 0;
+            int initialDegree = random.nextInt(360);
+            int angleShift = 360 / totalRFChains;
             for (Sector sector : bts.getSectors()) {
                 for (Cell cell : sector.getCells()) {
                     cell.setSector(sector);
-                    cell.setAngleShift(cellIndex * (360 / totalRFChains));
+
+                    if (cellIndex == 0) {
+                        cell.setAngleShift(initialDegree);
+                    } else {
+                        cell.setAngleShift(((cellIndex * angleShift) + initialDegree) % 360);
+                    }
+
                     cell.setSingularValuesH(singularValuesH);
 
                     cells.add(cell);
@@ -337,16 +349,16 @@ public abstract class UDN {
 
         lastfreq = workingFrequency;
 
-        List<Cell> previousCells = this.cells_.putIfAbsent(workingFrequency, cells);
+        List<Cell> previousCells = this.cells.putIfAbsent(workingFrequency, cells);
         if (previousCells != null) {
             previousCells.addAll(cells);
-            this.cells_.put(workingFrequency, previousCells);
+            this.cells.put(workingFrequency, previousCells);
         }
 
-        List<BTS> previousBTSs = btss_.putIfAbsent(workingFrequency, btss);
+        List<BTS> previousBTSs = this.btss.putIfAbsent(workingFrequency, btss);
         if (previousBTSs != null) {
             previousBTSs.addAll(btss);
-            this.btss_.put(workingFrequency, previousBTSs);
+            this.btss.put(workingFrequency, previousBTSs);
         }
     }
 
@@ -355,13 +367,13 @@ public abstract class UDN {
      */
     private void computeVoronoiPropagationRegion(List<Region> regions) {
         //for each point in the grid, find the closest Region
-        for (int i = 0; i < gridPointsX_; i++) {
-            for (int j = 0; j < gridPointsY_; j++) {
+        for (int i = 0; i < gridPointsX; i++) {
+            for (int j = 0; j < gridPointsY; j++) {
                 Region closestRegion = null;
                 double d, maxDistance = Double.MAX_VALUE;
 
                 for (Region r : regions) {
-                    d = distance2D(grid[i][j][0].x_, grid[i][j][0].y_, r.x_, r.y_);
+                    d = distance2D(grid[i][j][0].x, grid[i][j][0].y, r.x, r.y);
                     if (d < maxDistance) {
                         maxDistance = d;
                         closestRegion = r;
@@ -387,10 +399,10 @@ public abstract class UDN {
         double min = Double.POSITIVE_INFINITY;
         List<Cell> closestCells = new ArrayList<>();
 
-        for (double frequency : this.cells_.keySet()) {
-            if (!cells_.get(frequency).isEmpty() && cells_.get(frequency).get(0).getType() == type) {
-                for (Cell c : cells_.get(frequency)) {
-                    double distance = distance2D(p.x_, p.y_, c.getBTS().getX(), c.getBTS().getY());
+        for (double frequency : this.cells.keySet()) {
+            if (!cells.get(frequency).isEmpty() && cells.get(frequency).get(0).getType() == type) {
+                for (Cell c : cells.get(frequency)) {
+                    double distance = distance2D(p.x, p.y, c.getBTS().getX(), c.getBTS().getY());
 
                     if (distance < min) {
                         min = distance;
@@ -406,7 +418,7 @@ public abstract class UDN {
         Cell closest = null;
         double max_sinr = Double.NEGATIVE_INFINITY;
         for (Cell c : closestCells) {
-            double sinr = getGridPoint(p.x_, p.y_, p.z_).computeSINR(c);
+            double sinr = getGridPoint(p.x, p.y, p.z).computeSNR(c);
             if (sinr > max_sinr) {
                 max_sinr = sinr;
                 closest = c;
@@ -417,7 +429,7 @@ public abstract class UDN {
     }
 
     public String getMobilityType() {
-        return mobilityType_;
+        return mobilityType;
     }
 
     /**
@@ -488,7 +500,7 @@ public abstract class UDN {
 //        }
 
         int offset = 4;
-        String[][] matrix = new String[gridPointsX_ * offset / 2][gridPointsY_];
+        String[][] matrix = new String[gridPointsX * offset / 2][gridPointsY];
 
         for (String[] strings : matrix) {
             Arrays.fill(strings, String.format("%1$" + offset + "s", ""));
@@ -501,8 +513,8 @@ public abstract class UDN {
             }
         }
 
-        for (int i = 0; i < gridPointsX_; i++) {
-            for (int j = 0; j < gridPointsY_; j++) {
+        for (int i = 0; i < gridPointsX; i++) {
+            for (int j = 0; j < gridPointsY; j++) {
                 for (int k = 0; k < 5; k++) {
                     if (grid[i][j][k].hasBTSInstalled()) {
                         List<Cell> cells = grid[i][j][k].getCells();
@@ -546,7 +558,7 @@ public abstract class UDN {
             }
         }
 
-        users_.forEach(user -> {
+        users.forEach(user -> {
             int x = user.getX() * offset / 2;
 
             // Print the user ID and the serving cell ID
@@ -594,8 +606,8 @@ public abstract class UDN {
             System.out.println();
         }
 
-        for (double d : btss_.keySet()) {
-            for (BTS b : btss_.get(d)) {
+        for (double d : btss.keySet()) {
+            for (BTS b : btss.get(d)) {
                 System.out.print("BTS ID " + b.getId() + "\t->\t");
                 for (Sector s : b.getSectors()) {
                     for (Cell c : s.getCells()) {
@@ -645,7 +657,7 @@ public abstract class UDN {
         String towerBack = ANSI_YELLOW_BACKGROUND;
 
         int offset = 4;
-        String[][] matrix = new String[gridPointsX_ * offset / 2][gridPointsY_];
+        String[][] matrix = new String[gridPointsX * offset / 2][gridPointsY];
 
         for (String[] strings : matrix) {
             Arrays.fill(strings, String.format("%1$" + offset + "s", ""));
@@ -686,9 +698,9 @@ public abstract class UDN {
         boolean installed = false;
         boolean active = true;
 
-        for (int i = 0; i < gridPointsX_; i++) {
-            for (int j = 0; j < gridPointsY_; j++) {
-                for (int k = 0; k < gridPointsZ_; k++) {
+        for (int i = 0; i < gridPointsX; i++) {
+            for (int j = 0; j < gridPointsY; j++) {
+                for (int k = 0; k < gridPointsZ; k++) {
                     if (grid[i][j][k].hasBTSInstalled()) {
                         installed = true;
                         if (grid[i][j][k].getActiveCells().isEmpty()) {
@@ -715,7 +727,7 @@ public abstract class UDN {
             }
         }
 
-        users_.forEach(user -> {
+        users.forEach(user -> {
             int x = user.getX() * offset / 2;
             BTS b = user.getServingCell().getBTS();
             Point bp = grid[b.getX()][b.getY()][b.getZ()];
@@ -786,8 +798,8 @@ public abstract class UDN {
             //for(int j = 0; j<Towerss.size(); j++){
             //Point p = Towers.get(j);
             System.out.print("TOW " + Towers.indexOf(p) + "\t->\t");
-            for (int k = 0; k < gridPointsZ_; k++) {
-                Point pcheck = grid[p.x_][p.y_][k];
+            for (int k = 0; k < gridPointsZ; k++) {
+                Point pcheck = grid[p.x][p.y][k];
                 for (BTS b : pcheck.getInstalledBTS().values()) {
 
                     System.out.print("BTS " + b.getId() + "(" + b.getSectors().get(0).getCells().get(0).printType() + ") ");
@@ -807,8 +819,8 @@ public abstract class UDN {
      * Print user information
      */
     void printUsers() {
-        System.out.println("Printing information of " + this.users_.size() + " users:");
-        System.out.println(this.users_);
+        System.out.println("Printing information of " + this.users.size() + " users:");
+        System.out.println(this.users);
     }
 
     /**
@@ -817,7 +829,7 @@ public abstract class UDN {
      * @return The list of users
      */
     public List<User> getUsers() {
-        return users_;
+        return users;
     }
 
     /**
@@ -828,7 +840,7 @@ public abstract class UDN {
     public int getTotalNumberOfCells() {
         int count = 0;
 
-        for (List<Cell> c : this.cells_.values()) {
+        for (List<Cell> c : this.cells.values()) {
             count += c.size();
         }
 
@@ -843,7 +855,7 @@ public abstract class UDN {
     public int getTotalNumberOfActivableCells() {
         int count = 0;
 
-        for (List<Cell> c : this.cells_.values()) {
+        for (List<Cell> c : this.cells.values()) {
             if ((c.size() > 0) && (c.get(0).getType() != CellType.MACRO)) {
                 count += c.size();
             }
@@ -870,7 +882,7 @@ public abstract class UDN {
      * @return Random number
      */
     public Random getRandom() {
-        return random_;
+        return random;
     }
 
     /**
@@ -879,7 +891,7 @@ public abstract class UDN {
      * @return Inter point separation of the grid
      */
     public double getInterpointSeparation() {
-        return this.interPointSeparation_;
+        return this.interPointSeparation;
     }
 
     /**
@@ -891,7 +903,7 @@ public abstract class UDN {
     public void setCellActivation(BitSet cso) {
         int bts = 0;
 
-        for (List<Cell> cells : this.cells_.values()) {
+        for (List<Cell> cells : this.cells.values()) {
             for (Cell c : cells) {
                 if (c.getType() != CellType.MACRO) {
                     c.setActivation(cso.get(bts));   //TODO revisar si esto es correcto
@@ -909,7 +921,7 @@ public abstract class UDN {
     public void copyCellActivation(BitSet cso) {
         int bts = 0;
 
-        for (List<Cell> cells : this.cells_.values()) {
+        for (List<Cell> cells : this.cells.values()) {
             for (Cell c : cells) {
                 if (c.getType() != CellType.MACRO) {
                     //c.setActivation(cso.getIth(bts));
@@ -927,10 +939,10 @@ public abstract class UDN {
      */
     public int pointsWithStatsComputed() {
         int count = 0;
-        for (int i = 0; i < this.gridPointsX_; i++) {
-            for (int j = 0; j < this.gridPointsY_; j++) {
-                for (int k = 0; k < this.gridPointsZ_; k++) {
-                    if (grid[i][j][k].statsComputed_) {
+        for (int i = 0; i < this.gridPointsX; i++) {
+            for (int j = 0; j < this.gridPointsY; j++) {
+                for (int k = 0; k < this.gridPointsZ; k++) {
+                    if (grid[i][j][k].statsComputed) {
                         count++;
                     }
                 }
@@ -948,7 +960,7 @@ public abstract class UDN {
     public int getTotalNumberOfActiveCells() {
         int count = 0;
 
-        for (List<Cell> cells : this.cells_.values()) {
+        for (List<Cell> cells : this.cells.values()) {
             for (Cell c : cells) {
                 if (c.isActive()) {
                     count++;
@@ -964,7 +976,7 @@ public abstract class UDN {
      */
     public void computeSignaling() {
         //computes for all as it is used in the solution initialization
-        for (User u : this.users_) {
+        for (User u : this.users) {
             int i = u.getX();
             int j = u.getY();
             int k = u.getZ();
@@ -977,7 +989,7 @@ public abstract class UDN {
      * Set to 0 the number of users assigned to all the cells of the UDN
      */
     public void resetNumberOfUsersAssignedToCells() {
-        for (List<Cell> cells : this.cells_.values()) {
+        for (List<Cell> cells : this.cells.values()) {
             for (Cell c : cells) {
                 c.setNumbersOfUsersAssigned(0);
             }
@@ -989,13 +1001,13 @@ public abstract class UDN {
      */
     public void validateUserAssigned() {
         int users = 0;
-        for (List<Cell> cells : this.cells_.values()) {
+        for (List<Cell> cells : this.cells.values()) {
             for (Cell c : cells) {
                 users += c.getAssignedUsers();
             }
         }
 
-        if (users != this.users_.size()) {
+        if (users != this.users.size()) {
             System.out.println("Error when assgning users.");
             System.exit(-1);
         }
@@ -1014,13 +1026,13 @@ public abstract class UDN {
     public double distance2D(int x1, int y1, int x2, int y2) {
         double d = 0.0;
 
-        x1 = x1 * this.interPointSeparation_;
-        y1 = y1 * this.interPointSeparation_;
-        x2 = x2 * this.interPointSeparation_;
-        y2 = y2 * this.interPointSeparation_;
+        x1 = x1 * this.interPointSeparation;
+        y1 = y1 * this.interPointSeparation;
+        x2 = x2 * this.interPointSeparation;
+        y2 = y2 * this.interPointSeparation;
 
         if ((x1 == x2) && (y1 == y2)) {
-            return 0.1 * this.interPointSeparation_;
+            return 0.1 * this.interPointSeparation;
         } else {
 
             d += (x1 - x2) * (x1 - x2);
@@ -1045,15 +1057,15 @@ public abstract class UDN {
     public double distance(int x1, int y1, int z1, int x2, int y2, int z2) {
         double d = 0.0;
 
-        x1 = x1 * this.interPointSeparation_;
-        y1 = y1 * this.interPointSeparation_;
-        z1 = z1 * this.interPointSeparation_;
-        x2 = x2 * this.interPointSeparation_;
-        y2 = y2 * this.interPointSeparation_;
-        z2 = z2 * this.interPointSeparation_;
+        x1 = x1 * this.interPointSeparation;
+        y1 = y1 * this.interPointSeparation;
+        z1 = z1 * this.interPointSeparation;
+        x2 = x2 * this.interPointSeparation;
+        y2 = y2 * this.interPointSeparation;
+        z2 = z2 * this.interPointSeparation;
 
         if ((x1 == x2) && (y1 == y2) && (z1 == z2)) {
-            return 0.1 * this.interPointSeparation_;
+            return 0.1 * this.interPointSeparation;
         } else {
 
             d += (x2 - x1) * (x2 - x1);
@@ -1079,17 +1091,17 @@ public abstract class UDN {
         int occi, azi;
 
         Point bts_p = bts.getPoint();
-        double d3 = distance(p.x_, p.y_, p.z_, bts_p.x_, bts_p.y_, bts_p.z_);
-        double d2 = distance2D(p.x_, p.y_, bts_p.x_, bts_p.y_);
-        int xDistance = abs(p.x_ - bts_p.x_) * this.interPointSeparation_;
-        int yDistance = abs(p.y_ - bts_p.y_) * this.interPointSeparation_;
-        int zDistance = abs(p.z_ - bts_p.z_) * this.interPointSeparation_;
+        double d3 = distance(p.x, p.y, p.z, bts_p.x, bts_p.y, bts_p.z);
+        double d2 = distance2D(p.x, p.y, bts_p.x, bts_p.y);
+        int xDistance = abs(p.x - bts_p.x) * this.interPointSeparation;
+        int yDistance = abs(p.y - bts_p.y) * this.interPointSeparation;
+        int zDistance = abs(p.z - bts_p.z) * this.interPointSeparation;
 
         occirad = acos(zDistance / d3);
         occi = 180 - (int) Math.toDegrees(occirad);
 
-        if (p.x_ >= bts_p.x_) {
-            if (p.y_ >= bts_p.y_) {
+        if (p.x >= bts_p.x) {
+            if (p.y >= bts_p.y) {
                 //azi between 0 and 90 deg
                 azirad = acos(xDistance / d2);
                 azi = (int) Math.toDegrees(azirad);
@@ -1099,7 +1111,7 @@ public abstract class UDN {
                 azi = 270 + (int) Math.toDegrees(azirad);
             }
         } else {
-            if (p.y_ >= bts_p.y_) {
+            if (p.y >= bts_p.y) {
                 //azi between 90 and 180 deg
                 azirad = acos(yDistance / d2);
                 azi = 90 + (int) Math.toDegrees(azirad);
@@ -1164,9 +1176,9 @@ public abstract class UDN {
      * Randomly allocate the positions of the users
      */
     public void updateUsersPosition() {
-        for (User u : users_) {
-            int x = random_.nextInt(gridPointsX_);
-            int y = random_.nextInt(gridPointsY_);
+        for (User u : users) {
+            int x = random.nextInt(gridPointsX);
+            int y = random.nextInt(gridPointsY);
             u.setX(x);
             u.setY(y);
         }
@@ -1176,7 +1188,7 @@ public abstract class UDN {
      * Updates the demands of all the users
      */
     public void updateUsersDemand() {
-        for (User u : this.users_) {
+        for (User u : this.users) {
             u.updateDemand();
         }
     }
@@ -1188,7 +1200,7 @@ public abstract class UDN {
      */
     public int usersConnectedToMacro() {
         int count = 0;
-        for (User u : this.users_) {
+        for (User u : this.users) {
             if (u.getServingCell().getType() == CellType.MACRO) {
                 count++;
             }
@@ -1203,7 +1215,7 @@ public abstract class UDN {
      */
     public int usersConnectedToFemto() {
         int count = 0;
-        for (User u : this.users_) {
+        for (User u : this.users) {
             if (u.getServingCell().getType() == CellType.FEMTO) {
                 count++;
             }
@@ -1218,7 +1230,7 @@ public abstract class UDN {
      */
     public int usersConnectedToMicro() {
         int count = 0;
-        for (User u : this.users_) {
+        for (User u : this.users) {
             if (u.getServingCell().getType() == CellType.MICRO) {
                 count++;
             }
@@ -1233,7 +1245,7 @@ public abstract class UDN {
      */
     public int usersConnectedToPico() {
         int count = 0;
-        for (User u : this.users_) {
+        for (User u : this.users) {
             if (u.getServingCell().getType() == CellType.PICO) {
                 count++;
             }
@@ -1243,8 +1255,8 @@ public abstract class UDN {
 
     public int getActiveCellsByType(CellType type) {
         int count = 0;
-        for (Double d : cells_.keySet()) {
-            for (Cell c : cells_.get(d)) {
+        for (Double d : cells.keySet()) {
+            for (Cell c : cells.get(d)) {
                 if (c.getType() == type) {
                     count++;
                 } else {
@@ -1260,11 +1272,11 @@ public abstract class UDN {
      * SINR. The goal is saving computational time and memory.
      */
     public void emptyMapsAtPoints() {
-        for (int i = 0; i < this.gridPointsX_; i++) {
-            for (int j = 0; j < this.gridPointsY_; j++) {
-                for (int k = 0; k < this.gridPointsZ_; k++) {
-                    this.grid[i][j][k].signalPowerMap_ = new HashMap<>();
-                    this.grid[i][j][k].sinrMap_ = new HashMap<>();
+        for (int i = 0; i < this.gridPointsX; i++) {
+            for (int j = 0; j < this.gridPointsY; j++) {
+                for (int k = 0; k < this.gridPointsZ; k++) {
+                    this.grid[i][j][k].signalPowerMap = new HashMap<>();
+                    this.grid[i][j][k].snrMap = new HashMap<>();
                 }
             }
         }
@@ -1272,6 +1284,14 @@ public abstract class UDN {
 
     public String getOperatorsFile() {
         return operatorsFile;
+    }
+
+    public List<SocialAttractor> getSocialAttractors() {
+        return socialAttractors;
+    }
+
+    public Map<Double, List<Cell>> getCells() {
+        return cells;
     }
 
     public List<Integer[]> getCellOrder() {
@@ -1284,4 +1304,6 @@ public abstract class UDN {
     public enum CellType {
         MACRO, MICRO, PICO, FEMTO
     }
+
+
 }

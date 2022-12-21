@@ -99,7 +99,7 @@ public class StaticCSO extends CSO {
         boolean hasActiveCells;
         double maintenancePower = 2000; // mW
 
-        for (List<BTS> btss : udn_.btss_.values()) {
+        for (List<BTS> btss : udn_.btss.values()) {
             for (BTS bts : btss) {
                 hasActiveCells = false;
                 for (Sector sector : bts.getSectors()) {

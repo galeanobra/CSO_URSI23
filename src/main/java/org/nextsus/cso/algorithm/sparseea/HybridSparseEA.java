@@ -2,9 +2,11 @@ package org.nextsus.cso.algorithm.sparseea;
 
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
+import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.operator.selection.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
+import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
 import org.uma.jmetal.util.densityestimator.impl.CrowdingDistanceDensityEstimator;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
  * IEEE Transactions on Evolutionary Computation, vol. 24, no. 2,
  * pp. 380-393, April 2020.
  */
-public class HybridSparseEA<S extends Solution<?>> {
+public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
 
     //    private final List<Solution> tabu;
 //    private int tabuSize;
@@ -47,6 +49,7 @@ public class HybridSparseEA<S extends Solution<?>> {
      * @param problem Problem to solve
      */
     public HybridSparseEA(Problem<S> problem, int maxEvalutaions, int populationSize, double crossoverProb, double mutationProb, SelectionOperator<List<S>, S> selectionOperator, int numberOfBits) {
+        super(problem);
 //        tabu = new ArrayList<>();
 //        tabuSize = 5;
         this.problem = problem;
@@ -361,5 +364,45 @@ public class HybridSparseEA<S extends Solution<?>> {
             if (b == bool) counter++;
         }
         return counter;
+    }
+
+    @Override
+    protected void initProgress() {
+
+    }
+
+    @Override
+    protected void updateProgress() {
+
+    }
+
+    @Override
+    protected boolean isStoppingConditionReached() {
+        return false;
+    }
+
+    @Override
+    protected List<S> evaluatePopulation(List<S> population) {
+        return null;
+    }
+
+    @Override
+    protected List<S> replacement(List<S> population, List<S> offspringPopulation) {
+        return null;
+    }
+
+    @Override
+    public List<S> getResult() {
+        return SolutionListUtils.getNonDominatedSolutions(population);
+    }
+
+    @Override
+    public String getName() {
+        return "SparseEA";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Sparse Evolutionary Algorithm";
     }
 }
