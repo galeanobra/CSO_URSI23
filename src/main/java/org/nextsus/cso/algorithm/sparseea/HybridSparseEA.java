@@ -201,7 +201,7 @@ public class HybridSparseEA<S extends Solution<?>> {
         List<BinaryCSOSolution> population = new ArrayList<>(populationSize);
 
         for (int i = 0; i < populationSize; i++) {
-            BinaryCSOSolution s = new BinaryCSOSolution(Collections.singletonList(this.numberOfBits), problem.getNumberOfObjectives());
+            BinaryCSOSolution s = new BinaryCSOSolution(Collections.singletonList(this.numberOfBits), problem.numberOfObjectives());
             BitSet bits = s.variables().get(0);
             for (int j = 0; j < d; j++)
                 bits.set(j, variables[i][j]);
@@ -283,7 +283,7 @@ public class HybridSparseEA<S extends Solution<?>> {
 
         List<BinaryCSOSolution> _population_variation = new ArrayList<>(_population.size());
         for (boolean[] b : oMask) {
-            BinaryCSOSolution s = new BinaryCSOSolution(Collections.singletonList(this.numberOfBits), problem.getNumberOfObjectives());
+            BinaryCSOSolution s = new BinaryCSOSolution(Collections.singletonList(this.numberOfBits), problem.numberOfObjectives());
             BitSet bits = s.variables().get(0);
             for (int i = 0; i < b.length; i++)
                 bits.set(i, b[i]);

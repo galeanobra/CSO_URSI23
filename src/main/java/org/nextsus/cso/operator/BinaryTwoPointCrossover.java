@@ -22,23 +22,23 @@ public class BinaryTwoPointCrossover<T> implements CrossoverOperator<BinaryCSOSo
     }
 
     @Override
-    public double getCrossoverProbability() {
+    public double crossoverProbability() {
         return this.probability;
     }
 
     @Override
-    public int getNumberOfRequiredParents() {
+    public int numberOfRequiredParents() {
         return 2;
     }
 
     @Override
-    public int getNumberOfGeneratedChildren() {
+    public int numberOfGeneratedChildren() {
         return 2;
     }
 
     @Override
     public List<BinaryCSOSolution> execute(List<BinaryCSOSolution> s) {
-        Check.that(getNumberOfRequiredParents() == s.size(), "Point Crossover requires + " + getNumberOfRequiredParents() + " parents, but got " + s.size());
+        Check.that(numberOfRequiredParents() == s.size(), "Point Crossover requires + " + numberOfRequiredParents() + " parents, but got " + s.size());
 
         if (randomNumberGenerator.nextDouble() < probability) {
             return doCrossover(s);

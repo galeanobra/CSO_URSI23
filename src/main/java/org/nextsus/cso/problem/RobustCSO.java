@@ -29,10 +29,6 @@ public class RobustCSO extends CSO {
 
         bits = udn_.getTotalNumberOfActivableCells();
 
-        setNumberOfVariables(1);
-        setNumberOfObjectives(4);
-        setNumberOfConstraints(0);
-        setName("RobustCSO");
         run_ = run;
         samplingSize_ = sampleSize;
 
@@ -40,6 +36,26 @@ public class RobustCSO extends CSO {
         if (udn_.getMobilityType().equalsIgnoreCase("shanghai")) {
             shanghai_ = true;
         }
+    }
+
+    @Override
+    public int numberOfVariables() {
+        return 1 ;
+    }
+
+    @Override
+    public int numberOfObjectives() {
+        return 4 ;
+    }
+
+    @Override
+    public int numberOfConstraints() {
+        return 0 ;
+    }
+
+    @Override
+    public String name() {
+        return "RobustCSO";
     }
 
     /**

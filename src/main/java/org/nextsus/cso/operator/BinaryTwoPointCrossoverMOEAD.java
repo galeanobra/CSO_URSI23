@@ -1,14 +1,10 @@
 package org.nextsus.cso.operator;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.nextsus.cso.solution.BinaryCSOSolution;
-import org.uma.jmetal.operator.crossover.CrossoverOperator;
-import org.uma.jmetal.util.errorchecking.Check;
-import org.uma.jmetal.util.errorchecking.JMetalException;
-import org.uma.jmetal.util.pseudorandom.JMetalRandom;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.ArrayUtils;
+import org.nextsus.cso.solution.BinaryCSOSolution;
+import org.uma.jmetal.util.errorchecking.Check;
 
 public class BinaryTwoPointCrossoverMOEAD<T> extends BinaryTwoPointCrossover<BinaryCSOSolution> {
 
@@ -51,7 +47,7 @@ public class BinaryTwoPointCrossoverMOEAD<T> extends BinaryTwoPointCrossover<Bin
     }
 
     @Override
-    public int getNumberOfRequiredParents() {
+    public int numberOfRequiredParents() {
         return 3;
     }
 }

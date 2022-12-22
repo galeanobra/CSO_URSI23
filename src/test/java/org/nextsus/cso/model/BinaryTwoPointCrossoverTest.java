@@ -26,8 +26,8 @@ public class BinaryTwoPointCrossoverTest {
             solution2Bool[i] = r.nextBoolean();
         }
 
-        BinaryCSOSolution s1 = new BinaryCSOSolution(cso.getListOfBitsPerVariable(), cso.getNumberOfObjectives());
-        BinaryCSOSolution s2 = new BinaryCSOSolution(cso.getListOfBitsPerVariable(), cso.getNumberOfObjectives());
+        BinaryCSOSolution s1 = new BinaryCSOSolution(cso.getListOfBitsPerVariable(), cso.numberOfObjectives());
+        BinaryCSOSolution s2 = new BinaryCSOSolution(cso.getListOfBitsPerVariable(), cso.numberOfObjectives());
         BinarySet bits1 = s1.variables().get(0);
         BinarySet bits2 = s2.variables().get(0);
         for (int i = 0; i < bits1.getBinarySetLength(); i++) {

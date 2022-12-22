@@ -17,7 +17,7 @@ public class Dynamic {
     //initializaition
     DynamicCSO cso = new DynamicCSO("main.conf", "LL", 0, SimTime);
     BinaryCSOSolution s = new BinaryCSOSolution(cso.getListOfBitsPerVariable(),
-        cso.getNumberOfObjectives());
+        cso.numberOfObjectives());
 
     cso.evaluate(s);
 //        cso.udn_.printGridNew();   // Comment for no debug info
