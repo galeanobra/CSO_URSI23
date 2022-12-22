@@ -39,19 +39,18 @@ public class NSGAIIConfiguredFromAParameterString {
             .split("\\s+");
 
 
-    AutoNSGAIICSO autoNSGAII = new AutoNSGAIICSO();
+    //var autoNSGAII = new AutoNSGAIICSOWithConstraints();
+    var autoNSGAII = new AutoNSGAIICSO();
     autoNSGAII.parseAndCheckParameters(parameters);
 
     AutoNSGAII.print(autoNSGAII.fixedParameterList);
     AutoNSGAII.print(autoNSGAII.autoConfigurableParameterList);
 
     EvolutionaryAlgorithm<BinaryCSOSolution> nsgaII = autoNSGAII.create();
-
-    EvaluationObserver evaluationObserver = new EvaluationObserver(1000);
+    EvaluationObserver evaluationObserver = new EvaluationObserver(100);
     RunTimeChartObserver<DoubleSolution> runTimeChartObserver =
         new RunTimeChartObserver<>(
-            //"NSGA-II", 80, "resources/referenceFrontsCSV/" + referenceFrontFileName);
-           "NSGA-II", 80, null);
+           "NSGA-II", 80, 100,null);
 
     nsgaII.getObservable().register(evaluationObserver);
     nsgaII.getObservable().register(runTimeChartObserver);
