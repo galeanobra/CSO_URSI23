@@ -18,7 +18,7 @@ import org.uma.jmetal.util.observer.impl.RunTimeChartObserver;
  *
  * @author Antonio J. Nebro (ajnebro@uma.es)
  */
-public class NSGAIIConfiguredFromAParameterString {
+public class NSGAIIWithConstraintsConfiguredFromAParameterString {
   public static void main(String[] args) {
     String referenceFrontFileName = "ReferenceFront.csv" ;
 
@@ -42,8 +42,7 @@ public class NSGAIIConfiguredFromAParameterString {
             .split("\\s+");
 
 
-    //var autoNSGAII = new AutoNSGAIICSOWithConstraints();
-    var autoNSGAII = new AutoNSGAIICSO();
+    var autoNSGAII = new AutoNSGAIICSOWithConstraints();
     autoNSGAII.parseAndCheckParameters(parameters);
 
     AutoNSGAII.print(autoNSGAII.fixedParameterList);
@@ -51,12 +50,13 @@ public class NSGAIIConfiguredFromAParameterString {
 
     EvolutionaryAlgorithm<BinaryCSOSolution> nsgaII = autoNSGAII.create();
     EvaluationObserver evaluationObserver = new EvaluationObserver(100);
-    RunTimeChartObserver<DoubleSolution> runTimeChartObserver =
-        new RunTimeChartObserver<>(
-           "NSGA-II", 80, 100,null);
+
     List<List<Double>> referencePoints;
     referencePoints = new ArrayList<>();
     referencePoints.add(Arrays.asList(0.01, -1400.0));
+    RunTimeChartObserver<DoubleSolution> runTimeChartObserver =
+        new RunTimeChartObserver<>(
+           "NSGA-II", 80, 100,null);
     runTimeChartObserver.setReferencePoins(referencePoints);
 
     nsgaII.getObservable().register(evaluationObserver);

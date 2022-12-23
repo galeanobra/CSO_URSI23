@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.nextsus.cso.auto.parameter.CreateInitialCSOSolutionsParameter;
 import org.nextsus.cso.auto.parameter.VariationCSOParameter;
 import org.nextsus.cso.problem.BinaryCSOProblem;
@@ -37,7 +36,6 @@ import org.uma.jmetal.component.catalogue.ea.selection.Selection;
 import org.uma.jmetal.component.catalogue.ea.variation.Variation;
 import org.uma.jmetal.component.util.RankingAndDensityEstimatorPreference;
 import org.uma.jmetal.problem.Problem;
-import org.uma.jmetal.util.ConstraintHandling;
 import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.comparator.MultiComparator;
 import org.uma.jmetal.util.comparator.constraintcomparator.impl.OverallConstraintViolationDegreeComparator;
@@ -172,8 +170,13 @@ public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
       populationSizeParameter.setValue(populationSizeWithArchiveParameter.getValue());
     }
 
+    // List<Double> referencePoint = Arrays.asList(0.02, -1200.0);
+    // Comparator<BinaryCSOSolution> dominanceComparator = new GDominanceComparator<>(referencePoint);
+    // Ranking<DoubleSolution> ranking = new FastNonDominatedSortRanking<>(dominanceComparator);
+
     Ranking<BinaryCSOSolution> ranking = new FastNonDominatedSortRanking<>(
         new DominanceWithConstraintsComparator<>(new OverallConstraintViolationDegreeComparator<>()));
+
     DensityEstimator<BinaryCSOSolution> densityEstimator = new CrowdingDistanceDensityEstimator<>();
     MultiComparator<BinaryCSOSolution> rankingAndCrowdingComparator =
         new MultiComparator<>(
@@ -258,13 +261,6 @@ public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
           selection,
           variation,
           replacement) {
-        @Override
-        public void updateProgress() {
-          getAttributes().put("EVALUATIONS", getNumberOfEvaluations()) ;
-          getAttributes().put("POPULATION",
-              getPopulation().stream().filter(ConstraintHandling::isFeasible).collect(
-                  Collectors.toList()));
-        }
       } ;
     }
   }
