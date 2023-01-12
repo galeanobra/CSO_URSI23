@@ -2,7 +2,7 @@ package org.nextsus.cso.auto;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.nextsus.cso.auto.algorithm.AutoNSGAIICSO;
+import org.nextsus.cso.auto.algorithm.AutoGNSGAIICSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.auto.autoconfigurablealgorithm.AutoNSGAII;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
@@ -18,14 +18,14 @@ import org.uma.jmetal.util.observer.impl.RunTimeChartObserver;
  *
  * @author Antonio J. Nebro (ajnebro@uma.es)
  */
-public class NSGAIIConfiguredFromAParameterString {
+public class GNSGAIIConfiguredFromAParameterString {
   public static void main(String[] args) {
     String referenceFrontFileName = "ReferenceFront.csv" ;
 
     String[] parameters =
         ("--problemName org.nextsus.cso.problem.StaticCSO "
                 + "--referenceFrontFileName "+ referenceFrontFileName + " "
-                + "--maximumNumberOfEvaluations 35000 "
+                + "--maximumNumberOfEvaluations 3000 "
                 + "--algorithmResult population "
                 + "--populationSize 100 "
                 + "--offspringPopulationSize 100 "
@@ -42,8 +42,7 @@ public class NSGAIIConfiguredFromAParameterString {
             .split("\\s+");
 
 
-    //var autoNSGAII = new AutoNSGAIICSOWithConstraints();
-    var autoNSGAII = new AutoNSGAIICSO();
+    var autoNSGAII = new AutoGNSGAIICSO();
     autoNSGAII.parseAndCheckParameters(parameters);
 
     AutoNSGAII.print(autoNSGAII.fixedParameterList);
@@ -67,8 +66,8 @@ public class NSGAIIConfiguredFromAParameterString {
     JMetalLogger.logger.info("Total computing time: " + nsgaII.getTotalComputingTime()); ;
 
     new SolutionListOutput(nsgaII.getResult())
-        .setVarFileOutputContext(new DefaultFileOutputContext("VAR.NSGAII.35k.csv", ","))
-        .setFunFileOutputContext(new DefaultFileOutputContext("FUN.NSGAII.35k.csv", ","))
+        .setVarFileOutputContext(new DefaultFileOutputContext("VAR.csv", ","))
+        .setFunFileOutputContext(new DefaultFileOutputContext("FUN.csv", ","))
         .print();
   }
 }

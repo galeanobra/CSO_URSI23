@@ -3,7 +3,7 @@ package org.nextsus.cso.auto.parameter;
 import static org.uma.jmetal.util.SolutionListUtils.getMatrixWithObjectiveValues;
 
 import java.io.IOException;
-import org.nextsus.cso.auto.AutoNSGAIICSO;
+import org.nextsus.cso.auto.algorithm.AutoNSGAIICSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
 import org.uma.jmetal.qualityindicator.impl.hypervolume.impl.PISAHypervolume;

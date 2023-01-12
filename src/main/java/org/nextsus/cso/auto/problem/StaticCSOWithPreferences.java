@@ -1,5 +1,6 @@
-package org.nextsus.cso.problem;
+package org.nextsus.cso.auto.problem;
 
+import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 
 public class StaticCSOWithPreferences extends StaticCSO {
@@ -28,8 +29,8 @@ public class StaticCSOWithPreferences extends StaticCSO {
   }
 
   private BinaryCSOSolution evaluatePreferences(BinaryCSOSolution solution) {
-    solution.constraints()[0] =  0.005 -  solution.objectives()[0] ;
-    solution.constraints()[1] =  -1500 - solution.objectives()[1] ;
+    solution.constraints()[0] =  0.01 -  solution.objectives()[0] ;
+    solution.constraints()[1] =  -1400 - solution.objectives()[1] ;
 
     return solution;
   }

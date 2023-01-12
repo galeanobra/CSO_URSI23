@@ -1,4 +1,4 @@
-package org.nextsus.cso.auto;
+package org.nextsus.cso.auto.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,7 +8,6 @@ import org.nextsus.cso.auto.parameter.CreateInitialCSOSolutionsParameter;
 import org.nextsus.cso.auto.parameter.VariationCSOParameter;
 import org.nextsus.cso.problem.BinaryCSOProblem;
 import org.nextsus.cso.problem.StaticCSO;
-import org.nextsus.cso.problem.StaticCSOWithPreferences;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.auto.autoconfigurablealgorithm.AutoConfigurableAlgorithm;
 import org.uma.jmetal.auto.parameter.CategoricalParameter;
@@ -38,8 +37,7 @@ import org.uma.jmetal.component.util.RankingAndDensityEstimatorPreference;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.comparator.MultiComparator;
-import org.uma.jmetal.util.comparator.constraintcomparator.impl.OverallConstraintViolationDegreeComparator;
-import org.uma.jmetal.util.comparator.dominanceComparator.impl.DominanceWithConstraintsComparator;
+import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
 import org.uma.jmetal.util.densityestimator.DensityEstimator;
 import org.uma.jmetal.util.densityestimator.impl.CrowdingDistanceDensityEstimator;
 import org.uma.jmetal.util.ranking.Ranking;
@@ -50,7 +48,7 @@ import org.uma.jmetal.util.ranking.impl.FastNonDominatedSortRanking;
  *
  * @autor Antonio J. Nebro
  */
-public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
+public class AutoNSGAIICSO implements AutoConfigurableAlgorithm {
   public List<Parameter<?>> autoConfigurableParameterList = new ArrayList<>();
   public List<Parameter<?>> fixedParameterList = new ArrayList<>();
   private StringParameter problemNameParameter;
@@ -161,7 +159,7 @@ public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
    */
   public EvolutionaryAlgorithm<BinaryCSOSolution> create() {
     String problemName = problemNameParameter.getValue() ;
-    Problem<BinaryCSOSolution> problem = new StaticCSOWithPreferences("main.properties", "LL", 0) ;
+    Problem<BinaryCSOSolution> problem = new StaticCSO("main.properties", "LL", 0) ;
     Archive<BinaryCSOSolution> archive = null;
 
     if (algorithmResultParameter.getValue().equals("externalArchive")) {
@@ -170,13 +168,8 @@ public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
       populationSizeParameter.setValue(populationSizeWithArchiveParameter.getValue());
     }
 
-    // List<Double> referencePoint = Arrays.asList(0.02, -1200.0);
-    // Comparator<BinaryCSOSolution> dominanceComparator = new GDominanceComparator<>(referencePoint);
-    // Ranking<DoubleSolution> ranking = new FastNonDominatedSortRanking<>(dominanceComparator);
-
     Ranking<BinaryCSOSolution> ranking = new FastNonDominatedSortRanking<>(
-        new DominanceWithConstraintsComparator<>(new OverallConstraintViolationDegreeComparator<>()));
-
+        new DefaultDominanceComparator<>());
     DensityEstimator<BinaryCSOSolution> densityEstimator = new CrowdingDistanceDensityEstimator<>();
     MultiComparator<BinaryCSOSolution> rankingAndCrowdingComparator =
         new MultiComparator<>(
@@ -260,11 +253,9 @@ public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
           termination,
           selection,
           variation,
-          replacement) {
-      } ;
+          replacement);
     }
   }
-
 
   public static void print(List<Parameter<?>> parameterList) {
     parameterList.forEach(System.out::println);

@@ -1,4 +1,4 @@
-package org.nextsus.cso.auto;
+package org.nextsus.cso.auto.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ import org.uma.jmetal.component.util.RankingAndDensityEstimatorPreference;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.comparator.MultiComparator;
-import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
+import org.uma.jmetal.util.comparator.dominanceComparator.impl.GDominanceComparator;
 import org.uma.jmetal.util.densityestimator.DensityEstimator;
 import org.uma.jmetal.util.densityestimator.impl.CrowdingDistanceDensityEstimator;
 import org.uma.jmetal.util.ranking.Ranking;
@@ -48,7 +48,7 @@ import org.uma.jmetal.util.ranking.impl.FastNonDominatedSortRanking;
  *
  * @autor Antonio J. Nebro
  */
-public class AutoNSGAIICSO implements AutoConfigurableAlgorithm {
+public class AutoGNSGAIICSO implements AutoConfigurableAlgorithm {
   public List<Parameter<?>> autoConfigurableParameterList = new ArrayList<>();
   public List<Parameter<?>> fixedParameterList = new ArrayList<>();
   private StringParameter problemNameParameter;
@@ -158,7 +158,6 @@ public class AutoNSGAIICSO implements AutoConfigurableAlgorithm {
    * @return
    */
   public EvolutionaryAlgorithm<BinaryCSOSolution> create() {
-    String problemName = problemNameParameter.getValue() ;
     Problem<BinaryCSOSolution> problem = new StaticCSO("main.properties", "LL", 0) ;
     Archive<BinaryCSOSolution> archive = null;
 
@@ -168,8 +167,8 @@ public class AutoNSGAIICSO implements AutoConfigurableAlgorithm {
       populationSizeParameter.setValue(populationSizeWithArchiveParameter.getValue());
     }
 
-    Ranking<BinaryCSOSolution> ranking = new FastNonDominatedSortRanking<>(
-        new DefaultDominanceComparator<>());
+    List<Double> referencePoint = List.of(0.01, -1400.0);
+    Ranking<BinaryCSOSolution> ranking = new FastNonDominatedSortRanking<>(new GDominanceComparator<>(referencePoint));
     DensityEstimator<BinaryCSOSolution> densityEstimator = new CrowdingDistanceDensityEstimator<>();
     MultiComparator<BinaryCSOSolution> rankingAndCrowdingComparator =
         new MultiComparator<>(

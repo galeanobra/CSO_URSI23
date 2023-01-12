@@ -3,15 +3,15 @@ package org.nextsus.cso.auto;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.nextsus.cso.auto.algorithm.AutoNSGAIICSOWithConstraints;
+import org.nextsus.cso.auto.util.RunTimeFilteringUnfeasibleSolutionsChartObserver;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.auto.autoconfigurablealgorithm.AutoNSGAII;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
-import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.observer.impl.EvaluationObserver;
-import org.uma.jmetal.util.observer.impl.RunTimeChartObserver;
 
 /**
  * Class configuring NSGA-II using arguments in the form <key, value> and the {@link AutoNSGAII} class.
@@ -54,10 +54,10 @@ public class NSGAIIWithConstraintsConfiguredFromAParameterString {
     List<List<Double>> referencePoints;
     referencePoints = new ArrayList<>();
     referencePoints.add(Arrays.asList(0.01, -1400.0));
-    RunTimeChartObserver<DoubleSolution> runTimeChartObserver =
-        new RunTimeChartObserver<>(
+    var runTimeChartObserver =
+        new RunTimeFilteringUnfeasibleSolutionsChartObserver<>(
            "NSGA-II", 80, 100,null);
-    runTimeChartObserver.setReferencePoins(referencePoints);
+    runTimeChartObserver.setReferencePoints(referencePoints);
 
     nsgaII.getObservable().register(evaluationObserver);
     nsgaII.getObservable().register(runTimeChartObserver);

@@ -1,5 +1,6 @@
-package org.nextsus.cso.auto;
+package org.nextsus.cso.auto.util;
 
+import org.nextsus.cso.auto.algorithm.AutoNSGAIICSO;
 import org.uma.jmetal.auto.irace.parameterfilegeneration.IraceParameterFileGenerator;
 
 /**
