@@ -147,6 +147,9 @@ public class AutoSparseEACSO<S extends Solution<?>> {
 
         distance.compute(population);
 
+        attributes.put("EVALUATIONS", this.evaluations);
+        attributes.put("POPULATION", population);
+        
         // Generations
         while (this.evaluations < this.maxEvaluations) {
             List<BinaryCSOSolution> _population = new ArrayList<>(2 * populationSize);   // P' -> 2 * N population
