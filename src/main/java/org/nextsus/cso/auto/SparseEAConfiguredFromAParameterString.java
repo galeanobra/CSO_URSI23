@@ -1,34 +1,29 @@
 package org.nextsus.cso.auto;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import org.nextsus.cso.auto.algorithm.AutoSparseEACSO;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.auto.autoconfigurablealgorithm.AutoNSGAII;
-import org.uma.jmetal.operator.Operator;
 import org.uma.jmetal.operator.selection.SelectionOperator;
-import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection;
 import org.uma.jmetal.operator.selection.impl.NaryTournamentSelection;
 import org.uma.jmetal.operator.selection.impl.RandomSelection;
-import org.uma.jmetal.operator.selection.impl.RankingAndCrowdingSelection;
 import org.uma.jmetal.problem.Problem;
-import org.uma.jmetal.solution.Solution;
+import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
-import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.MultiComparator;
-import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
 import org.uma.jmetal.util.densityestimator.DensityEstimator;
 import org.uma.jmetal.util.densityestimator.impl.CrowdingDistanceDensityEstimator;
 import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
+import org.uma.jmetal.util.observer.impl.RunTimeChartObserver;
 import org.uma.jmetal.util.ranking.Ranking;
 import org.uma.jmetal.util.ranking.impl.FastNonDominatedSortRanking;
-
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * Class configuring NSGA-II using arguments in the form <key, value> and the {@link AutoNSGAII} class.
@@ -76,6 +71,12 @@ public class SparseEAConfiguredFromAParameterString {
         }
 
         AutoSparseEACSO<BinaryCSOSolution> sparseea = new AutoSparseEACSO<>(problem, maximumNumberOfEvaluations, populationSize, crossoverProbability, mutationProbabilityFactor, selectionOperator, ((StaticCSO) problem).getTotalNumberOfActivableCells(), archive);
+
+        RunTimeChartObserver<DoubleSolution> runTimeChartObserver =
+            new RunTimeChartObserver<>(
+                "SparseEA", 80, 1,null);
+        sparseea.observable.register(runTimeChartObserver);
+
         sparseea.execute();
 
         JMetalLogger.logger.info("Total computing time: " + sparseea.getTotalComputingTime());

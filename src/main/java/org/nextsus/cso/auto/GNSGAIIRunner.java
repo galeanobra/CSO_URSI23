@@ -3,6 +3,7 @@ package org.nextsus.cso.auto;
 import java.util.ArrayList;
 import java.util.List;
 import org.nextsus.cso.auto.algorithm.AutoGNSGAIICSO;
+import org.nextsus.cso.auto.component.TerminationByAspirationPoint;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.auto.autoconfigurablealgorithm.AutoNSGAII;
 import org.uma.jmetal.component.algorithm.EvolutionaryAlgorithm;
@@ -21,6 +22,9 @@ import org.uma.jmetal.util.observer.impl.RunTimeChartObserver;
 public class GNSGAIIRunner {
   public static void main(String[] args) {
     String referenceFrontFileName = "ReferenceFront.csv" ;
+
+    List<List<Double>> referencePoints = new ArrayList<>();
+    referencePoints.add(List.of(0.01, -1400.0));
 
     String[] parameters =
         ("--problemName org.nextsus.cso.problem.StaticCSO "
@@ -49,13 +53,13 @@ public class GNSGAIIRunner {
     AutoNSGAII.print(autoNSGAII.autoConfigurableParameterList);
 
     EvolutionaryAlgorithm<BinaryCSOSolution> nsgaII = autoNSGAII.create();
+    nsgaII.setTermination(new TerminationByAspirationPoint(referencePoints, 55000));
+
+
     EvaluationObserver evaluationObserver = new EvaluationObserver(100);
     RunTimeChartObserver<DoubleSolution> runTimeChartObserver =
         new RunTimeChartObserver<>(
-           "NSGA-II", 80, 100,null);
-    List<List<Double>> referencePoints;
-    referencePoints = new ArrayList<>();
-    referencePoints.add(List.of(0.01, -1400.0));
+           "GNSGA-II", 80, 100,null);
     runTimeChartObserver.setReferencePoins(referencePoints);
 
     nsgaII.getObservable().register(evaluationObserver);
@@ -66,8 +70,8 @@ public class GNSGAIIRunner {
     JMetalLogger.logger.info("Total computing time: " + nsgaII.getTotalComputingTime()); ;
 
     new SolutionListOutput(nsgaII.getResult())
-        .setVarFileOutputContext(new DefaultFileOutputContext("VAR.csv", ","))
-        .setFunFileOutputContext(new DefaultFileOutputContext("FUN.csv", ","))
+        .setVarFileOutputContext(new DefaultFileOutputContext("VAR.GNSGAII.csv", ","))
+        .setFunFileOutputContext(new DefaultFileOutputContext("FUN.GNSGAII.csv", ","))
         .print();
   }
 }

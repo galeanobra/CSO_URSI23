@@ -9,6 +9,8 @@ import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
 import org.uma.jmetal.util.densityestimator.impl.CrowdingDistanceDensityEstimator;
+import org.uma.jmetal.util.observable.Observable;
+import org.uma.jmetal.util.observable.impl.DefaultObservable;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.RandomGenerator;
 import org.uma.jmetal.util.ranking.Ranking;
@@ -49,6 +51,9 @@ public class AutoSparseEACSO<S extends Solution<?>> {
 
     protected long time;
 
+    public final Observable<Map<String, Object>> observable;
+    private final Map<String, Object> attributes;
+
     /**
      * Constructor
      *
@@ -71,6 +76,8 @@ public class AutoSparseEACSO<S extends Solution<?>> {
         this.evaluations = 0;
 
         this.dominanceComparator = new DefaultDominanceComparator<>();
+        this.observable = new DefaultObservable<>("SparseEA Algorithm");
+        this.attributes = new HashMap<>();
     }
 
     /**
@@ -191,6 +198,14 @@ public class AutoSparseEACSO<S extends Solution<?>> {
                 for (int k = 0; k < remain; k++)
                     population.add(front.get(k));
             }
+
+            System.out.println(this.evaluations) ;
+
+            attributes.put("EVALUATIONS", this.evaluations);
+            attributes.put("POPULATION", population);
+
+            observable.setChanged();
+            observable.notifyObservers(attributes);
         }
 
         ranking = new FastNonDominatedSortRanking<>(this.dominanceComparator).compute((List<S>) population);
