@@ -1,5 +1,17 @@
 package org.nextsus.cso.auto.algorithm;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.selection.SelectionOperator;
@@ -15,10 +27,6 @@ import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.RandomGenerator;
 import org.uma.jmetal.util.ranking.Ranking;
 import org.uma.jmetal.util.ranking.impl.FastNonDominatedSortRanking;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of SparseEA.
@@ -149,9 +157,13 @@ public class AutoSparseEACSO<S extends Solution<?>> {
 
         attributes.put("EVALUATIONS", this.evaluations);
         attributes.put("POPULATION", population);
-        
+
+        //Termination termination = new TerminationByEvaluations(this.maxEvaluations) ;
+
         // Generations
         while (this.evaluations < this.maxEvaluations) {
+        //while (termination.isMet(attributes)) {
+
             List<BinaryCSOSolution> _population = new ArrayList<>(2 * populationSize);   // P' -> 2 * N population
             mask = new boolean[populationSize * 2][d];
             for (int i = 0; i < 2 * populationSize; i++) {                              // Fill _population with 2N parents from population
