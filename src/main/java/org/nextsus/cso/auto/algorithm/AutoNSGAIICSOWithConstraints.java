@@ -51,6 +51,7 @@ import org.uma.jmetal.util.ranking.impl.FastNonDominatedSortRanking;
  * @autor Antonio J. Nebro
  */
 public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
+  private final double[] aspirationPoint ;
   public List<Parameter<?>> autoConfigurableParameterList = new ArrayList<>();
   public List<Parameter<?>> fixedParameterList = new ArrayList<>();
   private StringParameter problemNameParameter;
@@ -66,6 +67,11 @@ public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
   private VariationCSOParameter variationParameter;
 
   private MutationParameter mutationParameter ;
+
+  public AutoNSGAIICSOWithConstraints(double[] aspirationPoint) {
+    super() ;
+    this.aspirationPoint = aspirationPoint ;
+  }
 
   @Override
   public List<Parameter<?>> getAutoConfigurableParameterList() {
@@ -161,7 +167,7 @@ public class AutoNSGAIICSOWithConstraints implements AutoConfigurableAlgorithm {
    */
   public EvolutionaryAlgorithm<BinaryCSOSolution> create() {
     String problemName = problemNameParameter.getValue() ;
-    Problem<BinaryCSOSolution> problem = new StaticCSOWithPreferences("main.properties", "LL", 0) ;
+    Problem<BinaryCSOSolution> problem = new StaticCSOWithPreferences("main.properties", "LL", 0, aspirationPoint) ;
     Archive<BinaryCSOSolution> archive = null;
 
     if (algorithmResultParameter.getValue().equals("externalArchive")) {

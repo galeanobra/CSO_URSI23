@@ -5,6 +5,7 @@ import org.nextsus.cso.solution.BinaryCSOSolution;
 
 public class StaticCSOWithPreferences extends StaticCSO {
 
+  private final double[] aspirationPoint ;
   /**
    * Creates an instance of the Static CSO problem
    *
@@ -12,8 +13,9 @@ public class StaticCSOWithPreferences extends StaticCSO {
    * @param scenario
    * @param run
    */
-  public StaticCSOWithPreferences(String mainConfig, String scenario, int run) {
+  public StaticCSOWithPreferences(String mainConfig, String scenario, int run, double[] aspirationPoint) {
     super(mainConfig, scenario, run);
+    this.aspirationPoint = aspirationPoint ;
   }
 
   @Override
@@ -29,8 +31,8 @@ public class StaticCSOWithPreferences extends StaticCSO {
   }
 
   private BinaryCSOSolution evaluatePreferences(BinaryCSOSolution solution) {
-    solution.constraints()[0] =  0.01 -  solution.objectives()[0] ;
-    solution.constraints()[1] =  -1400 - solution.objectives()[1] ;
+    solution.constraints()[0] =  aspirationPoint[0] -  solution.objectives()[0] ;
+    solution.constraints()[1] =  aspirationPoint[1] - solution.objectives()[1] ;
 
     return solution;
   }
