@@ -74,6 +74,9 @@ public class CSOMain {
 
         List<BinaryCSOSolution> population = algorithm.getResult();
 
+        // To remove infeasible solutions (both objectives are 0.0)
+        population.removeIf(s -> s.objectives()[0] == 0.0 && s.objectives()[1] == 0.0);
+
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
         String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID : "out/" + name + "/FUN/" + name + ".FUN." + taskID + "." + jobID + ".csv";
         String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID : "out/" + name + "/VAR/" + name + ".VAR." + taskID + "." + jobID + ".csv";
