@@ -205,6 +205,14 @@ public abstract class UDN {
         for (int i = 0; i < numberOfCellTypes; i++) {
             loadCellConfig("/scenarios/" + scenario + "/" + pro.getProperty("cell" + i));
         }
+        int totalCells = 0;
+        int totalBS = 0;
+
+        for(double d :cells.keySet()){
+            totalCells += cells.get(d).size();
+            totalBS += btss.get(d).size();
+        }
+        System.out.println("\tTotal cells: " +totalCells + ", Total BS: " + totalBS);
     }
 
     /**

@@ -120,7 +120,7 @@ public class StaticCSO extends CSO {
         }
 
         //mW -> W -> kW -> MW
-        sum /= 1000000000;
+        sum /= 1000000;
         //System.out.println("Power consumption = " + sum);
 
         return sum;
