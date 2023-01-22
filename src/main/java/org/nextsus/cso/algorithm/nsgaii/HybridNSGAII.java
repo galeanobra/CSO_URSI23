@@ -65,9 +65,9 @@ public class HybridNSGAII<S extends Solution<?>> extends NSGAII<S> implements Me
 
     @Override
     protected List<S> evaluatePopulation(List<S> population) {
-        int a = 0;
-        for (S s : population)
-            ((StaticCSO) problem).intelligentSwitchOff((BinaryCSOSolution) s);
+        if (problem.getName().equals("StaticCSO"))
+            for (S s : population)
+                ((StaticCSO) problem).intelligentSwitchOff((BinaryCSOSolution) s);
 
         return evaluator.evaluate(population, getProblem());
     }
