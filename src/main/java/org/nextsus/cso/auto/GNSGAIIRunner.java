@@ -24,7 +24,7 @@ public class GNSGAIIRunner {
     String referenceFrontFileName = "ReferenceFront.csv" ;
 
     List<List<Double>> referencePoints = new ArrayList<>();
-    referencePoints.add(List.of(0.01, -1400.0));
+    referencePoints.add(List.of(0.005, -2800.0));
 
     String[] parameters =
         ("--problemName org.nextsus.cso.problem.StaticCSO "
@@ -54,7 +54,6 @@ public class GNSGAIIRunner {
 
     EvolutionaryAlgorithm<BinaryCSOSolution> nsgaII = autoNSGAII.create();
     nsgaII.setTermination(new TerminationByAspirationPoint(referencePoints, 55000));
-
 
     EvaluationObserver evaluationObserver = new EvaluationObserver(100);
     RunTimeChartObserver<DoubleSolution> runTimeChartObserver =

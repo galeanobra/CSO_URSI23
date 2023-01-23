@@ -1,5 +1,6 @@
 package org.nextsus.cso.auto;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +38,7 @@ public class SparseEAConfiguredFromAParameterString {
         String[] parameters =
                 ("--problemName org.nextsus.cso.problem.StaticCSO "
                         + "--referenceFrontFileName " + referenceFrontFileName + " "
-                        + "--maximumNumberOfEvaluations 2000 "
+                        + "--maximumNumberOfEvaluations 50000 "
                         + "--algorithmResult externalArchive "
                         + "--populationSize 100 "
                         + "--selection random "
@@ -72,9 +73,15 @@ public class SparseEAConfiguredFromAParameterString {
 
         AutoSparseEACSO<BinaryCSOSolution> sparseea = new AutoSparseEACSO<>(problem, maximumNumberOfEvaluations, populationSize, crossoverProbability, mutationProbabilityFactor, selectionOperator, ((StaticCSO) problem).getTotalNumberOfActivableCells(), archive);
 
+
+        List<List<Double>> referencePoints = new ArrayList<>();
+        referencePoints.add(List.of(0.005, -2800.0));
+
         RunTimeChartObserver<DoubleSolution> runTimeChartObserver =
             new RunTimeChartObserver<>(
                 "SparseEA", 80, 1,null);
+        runTimeChartObserver.setReferencePoins(referencePoints);
+
         sparseea.observable.register(runTimeChartObserver);
 
         sparseea.execute();

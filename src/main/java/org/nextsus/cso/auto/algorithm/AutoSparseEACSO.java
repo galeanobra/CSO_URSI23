@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
+import org.uma.jmetal.component.catalogue.common.termination.Termination;
+import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
 import org.uma.jmetal.operator.selection.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
@@ -155,15 +157,23 @@ public class AutoSparseEACSO<S extends Solution<?>> {
 
         distance.compute(population);
 
+        Termination termination = new TerminationByEvaluations(this.maxEvaluations) ;
+
+        List<List<Double>> referencePoints = new ArrayList<>();
+        referencePoints.add(List.of(0.005, -2800.0));
+        //Termination termination= new TerminationByAspirationPoint(referencePoints, 55000) ;
+
+        // Generations
+        System.out.println("Max evaluations: " + this.maxEvaluations) ;
+
         attributes.put("EVALUATIONS", this.evaluations);
         attributes.put("POPULATION", population);
 
-        //Termination termination = new TerminationByEvaluations(this.maxEvaluations) ;
-
-        // Generations
-        while (this.evaluations < this.maxEvaluations) {
-        //while (termination.isMet(attributes)) {
-
+        observable.setChanged();
+        observable.notifyObservers(attributes);
+        //System.out.println("Max evaluations:" + maxEvaluations); ;
+        //while (this.evaluations < this.maxEvaluations) {
+        while (!termination.isMet(attributes)) {
             List<BinaryCSOSolution> _population = new ArrayList<>(2 * populationSize);   // P' -> 2 * N population
             mask = new boolean[populationSize * 2][d];
             for (int i = 0; i < 2 * populationSize; i++) {                              // Fill _population with 2N parents from population
