@@ -76,8 +76,8 @@ public class CSOMain {
         population.removeIf(s -> s.objectives()[0] == 0.0 && s.objectives()[1] == 0.0);
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
-        String dir = alg + "_r";
-        String name = alg + "_r_" + run;
+        String dir = alg + "_b";
+        String name = alg + "_b_" + run;
         String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID + ".csv" : "out/" + scenario + "/" + dir + "/FUN/" + name + ".FUN." + taskID + "." + jobID + ".csv";
         String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID + ".csv" : "out/" + scenario + "/" + dir + "/VAR/" + name + ".VAR." + taskID + "." + jobID + ".csv";
 
