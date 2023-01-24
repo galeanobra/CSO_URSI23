@@ -1,12 +1,12 @@
 package org.nextsus.cso.algorithm;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.nextsus.cso.algorithm.mocell.HybridMOCell;
 import org.nextsus.cso.algorithm.moead.HybridMOEAD;
 import org.nextsus.cso.algorithm.nsgaii.HybridNSGAII;
 import org.nextsus.cso.algorithm.smsemoa.HybridSMSEMOA;
 import org.nextsus.cso.algorithm.sparseea.HybridSparseEA;
-import org.nextsus.cso.operator.BinaryTwoPointCrossover;
-import org.nextsus.cso.operator.BinaryTwoPointCrossoverMOEAD;
 import org.nextsus.cso.problem.RStaticCSO;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
@@ -16,15 +16,12 @@ import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.crossover.impl.TwoPointCrossover;
 import org.uma.jmetal.operator.mutation.MutationOperator;
-import org.uma.jmetal.operator.mutation.impl.GenericBitFlipMutation;
 import org.uma.jmetal.operator.mutation.impl.PolynomialMutation;
 import org.uma.jmetal.operator.selection.SelectionOperator;
 import org.uma.jmetal.operator.selection.impl.BinaryTournamentSelection;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.binarysolution.BinarySolution;
-import org.uma.jmetal.solution.binarysolution.impl.DefaultBinarySolution;
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
-import org.uma.jmetal.solution.doublesolution.impl.DefaultDoubleSolution;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.binarySet.BinarySet;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
@@ -34,10 +31,6 @@ import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.legacy.qualityindicator.impl.hypervolume.impl.PISAHypervolume;
 import org.uma.jmetal.util.neighborhood.impl.C9;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class RCSOMain {
     public static void main(String[] args) {
