@@ -9,11 +9,10 @@ import org.nextsus.cso.model.Point;
 import org.nextsus.cso.model.UDN;
 import us.hebi.matlab.mat.format.Mat5;
 import us.hebi.matlab.mat.types.Matrix;
+import us.hebi.matlab.mat.types.Source;
 import us.hebi.matlab.mat.types.Sources;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,10 +66,10 @@ public class BTS {
         } else if (typeName.equalsIgnoreCase("macro")) {
             this.type_ = UDN.CellType.MACRO;
         }
-
         try {
-            File file = new File(Objects.requireNonNull(getClass().getResource("/common/" + radiationPatternFile)).toURI());
-            antennaArray_ = Mat5.readFromFile(file).getMatrix(0);
+            InputStream in = getClass().getResourceAsStream("/common/" + radiationPatternFile);
+            Source source = Sources.wrapInputStream(Objects.requireNonNull(in));
+            antennaArray_ = Mat5.newReader(source).readMat().getMatrix(0);
         } catch (Exception e) {
             System.out.println("Error loading MAT file " + "/common/" + radiationPatternFile);
             System.exit(-1);

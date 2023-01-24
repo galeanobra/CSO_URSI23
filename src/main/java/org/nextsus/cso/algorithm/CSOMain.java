@@ -12,7 +12,6 @@ import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.examples.AlgorithmRunner;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
-import org.uma.jmetal.algorithm.multiobjective.moead.MOEAD;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.operator.mutation.impl.GenericBitFlipMutation;
@@ -42,10 +41,9 @@ public class CSOMain {
         int run = Integer.parseInt(args[2]);        // Seed selection
         int taskID = Integer.parseInt(args[3]);     // Task ID (for filename)
         int jobID = Integer.parseInt(args[4]);      // Job ID (for filename)
-        String name = args[5];                      // Name (for output directory)
-        String main = args[6];                      // Main configuration file
-        String scenario = args[7];                  // Scenario type
-        String alg = args[8];                       // Algorithm
+        String main = "main.properties";            // Main configuration file
+        String scenario = args[5];                  // Scenario type
+        String alg = args[6];                       // Algorithm
 
         problem = new StaticCSO(main, scenario, run);
 
@@ -78,8 +76,10 @@ public class CSOMain {
         population.removeIf(s -> s.objectives()[0] == 0.0 && s.objectives()[1] == 0.0);
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
-        String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID : "out/" + name + "/FUN/" + name + ".FUN." + taskID + "." + jobID + ".csv";
-        String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID : "out/" + name + "/VAR/" + name + ".VAR." + taskID + "." + jobID + ".csv";
+        String dir = alg + "_r";
+        String name = alg + "_r_" + run;
+        String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID + ".csv" : "out/" + scenario + "/" + dir + "/FUN/" + name + ".FUN." + taskID + "." + jobID + ".csv";
+        String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID + ".csv" : "out/" + scenario + "/" + dir + "/VAR/" + name + ".VAR." + taskID + "." + jobID + ".csv";
 
         // For local debug, comment previous lines and uncomment these
 //        String FUN = "FUN_" + taskID + ".csv";

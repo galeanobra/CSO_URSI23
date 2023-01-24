@@ -2,7 +2,6 @@ package org.nextsus.cso.problem;
 
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.problem.doubleproblem.impl.AbstractDoubleProblem;
-import org.uma.jmetal.solution.binarysolution.impl.DefaultBinarySolution;
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
 import org.uma.jmetal.util.binarySet.BinarySet;
 
@@ -49,5 +48,9 @@ public class RStaticCSO extends AbstractDoubleProblem {
 
     public BinaryCSOSolution evaluateBinary(BinaryCSOSolution solution) {
         return problem.evaluate(solution);
+    }
+
+    public int getRun() {
+        return problem.run_;
     }
 }
