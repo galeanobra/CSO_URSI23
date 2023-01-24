@@ -63,6 +63,7 @@
             <version>5.9.1</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.uma.jmetal</groupId>
             <artifactId>jmetal-core</artifactId>
@@ -86,7 +87,7 @@
         <dependency>
             <groupId>us.hebi.matlab.mat</groupId>
             <artifactId>mfl-core</artifactId>
-            <version>0.5.9</version>
+            <version>0.5.12</version>
         </dependency>
         <dependency>
             <groupId>org.tallison</groupId>
@@ -94,5 +95,4 @@
             <version>1.5</version>
         </dependency>
     </dependencies>
-
 </project>

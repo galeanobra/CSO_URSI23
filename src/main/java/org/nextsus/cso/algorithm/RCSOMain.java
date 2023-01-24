@@ -14,7 +14,7 @@ import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.examples.AlgorithmRunner;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;
-import org.uma.jmetal.operator.crossover.impl.TwoPointCrossover;
+import org.uma.jmetal.operator.crossover.impl.SBXCrossover;
 import org.uma.jmetal.operator.mutation.MutationOperator;
 import org.uma.jmetal.operator.mutation.impl.PolynomialMutation;
 import org.uma.jmetal.operator.selection.SelectionOperator;
@@ -32,6 +32,7 @@ import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.legacy.qualityindicator.impl.hypervolume.impl.PISAHypervolume;
 import org.uma.jmetal.util.neighborhood.impl.C9;
 
+
 public class RCSOMain {
     public static void main(String[] args) {
         StaticCSO problem;
@@ -46,10 +47,9 @@ public class RCSOMain {
         int run = Integer.parseInt(args[2]);        // Seed selection
         int taskID = Integer.parseInt(args[3]);     // Task ID (for filename)
         int jobID = Integer.parseInt(args[4]);      // Job ID (for filename)
-        String name = args[5];                      // Name (for output directory)
-        String main = args[6];                      // Main configuration file
-        String scenario = args[7];                  // Scenario type
-        String alg = args[8];                       // Algorithm
+        String main = "main.properties";            // Main configuration file
+        String scenario = args[5];                  // Scenario type
+        String alg = args[6];                       // Algorithm
 
         problem = new StaticCSO(main, scenario, run);
         problemDouble = new RStaticCSO(problem);
@@ -58,7 +58,7 @@ public class RCSOMain {
         double mutationProbability = 1.0 / problem.getTotalNumberOfActivableCells();
 
         // Crossover
-        crossover = new TwoPointCrossover(crossoverProbability);
+        crossover = new SBXCrossover(crossoverProbability, 20.0);
         mutation = new PolynomialMutation(mutationProbability, 20.0);
         selection = new BinaryTournamentSelection<>();
 
@@ -67,7 +67,7 @@ public class RCSOMain {
             case "mocell" -> new HybridMOCell<>(problemDouble, numEvals, popSize, new CrowdingDistanceArchive<>(popSize), new C9<>((int) Math.sqrt(popSize), (int) Math.sqrt(popSize)), crossover, mutation, selection, new SequentialSolutionListEvaluator<>());
             case "moead" -> new HybridMOEAD<>(problemDouble, popSize, popSize, numEvals, mutation, crossover, AbstractMOEAD.FunctionType.TCHE, "", 0.1, 2, 20);
             case "smsemoa" -> new HybridSMSEMOA<>(problemDouble, numEvals, popSize, 100.0, crossover, mutation, selection, new DefaultDominanceComparator<>(), new PISAHypervolume<>());
-            case "sparseea" -> new HybridSparseEA<>(problemDouble, numEvals, popSize, crossoverProbability, mutationProbability, new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>()), ((StaticCSO) problem).getTotalNumberOfActivableCells());
+            case "sparseea" -> new HybridSparseEA<>(problemDouble, numEvals, popSize, crossoverProbability, mutationProbability, new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>()), problem.getTotalNumberOfActivableCells());
             default -> new HybridNSGAII<>(problemDouble, numEvals, popSize, popSize, popSize, crossover, mutation, selection, new DefaultDominanceComparator<>(), new SequentialSolutionListEvaluator<>());
         };
 
@@ -81,12 +81,10 @@ public class RCSOMain {
         List<BinarySolution> binaryPopulation = toBinary(population);
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
-        String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID : "out/" + name + "/FUN/" + name + ".FUN." + taskID + "." + jobID + ".csv";
-        String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID : "out/" + name + "/VAR/" + name + ".VAR." + taskID + "." + jobID + ".csv";
-
-        // For local debug, comment previous lines and uncomment these
-//        String FUN = "FUN_" + taskID + ".csv";
-//        String VAR = "VAR_" + taskID + ".csv";
+        String dir = alg + "_r";
+        String name = alg + "_r_" + run;
+        String FUN = name + ".FUN." + taskID + "." + jobID + ".csv";
+        String VAR = name + ".VAR." + taskID + "." + jobID + ".csv";
 
         new SolutionListOutput(binaryPopulation).setVarFileOutputContext(new DefaultFileOutputContext(VAR, ",")).setFunFileOutputContext(new DefaultFileOutputContext(FUN, ",")).print();
 
