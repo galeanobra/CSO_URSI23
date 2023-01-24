@@ -59,7 +59,7 @@ public class NSGAIIRealEncodingRunner {
            "NSGA-II", 80, 100,null);
     List<List<Double>> referencePoints;
     referencePoints = new ArrayList<>();
-    referencePoints.add(List.of(0.006, -2800.0));
+    referencePoints.add(List.of(5.0, -2800.0));
     runTimeChartObserver.setReferencePoins(referencePoints);
 
     nsgaII.getObservable().register(evaluationObserver);
