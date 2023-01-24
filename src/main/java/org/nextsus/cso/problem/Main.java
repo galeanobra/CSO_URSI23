@@ -41,7 +41,7 @@ public class Main {
         }
 
         BinaryCSOSolution s = new BinaryCSOSolution(cso.getListOfBitsPerVariable(),
-                cso.getNumberOfObjectives());
+                cso.numberOfObjectives());
         BinarySet bits = s.variables().get(0);
         for (int i = 0; i < bits.getBinarySetLength(); i++) {
             bits.set(i, solutionBool[i]);

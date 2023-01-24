@@ -25,11 +25,6 @@ public class StaticCSO extends CSO {
 
         bits = udn_.getTotalNumberOfActivableCells();
 
-        setNumberOfVariables(1);
-        setNumberOfObjectives(2);
-        setNumberOfConstraints(0);
-        setName("StaticCSO");
-
         udn_.getTotalNumberOfActivableCells();
 
         run_ = run;
@@ -39,6 +34,26 @@ public class StaticCSO extends CSO {
         System.out.println("\n# Execution started #");
 
 //        udn_.getCellsOfInterestByPoint();
+    }
+
+    @Override
+    public int numberOfVariables() {
+        return 1 ;
+    }
+
+    @Override
+    public int numberOfObjectives() {
+        return 2 ;
+    }
+
+    @Override
+    public int numberOfConstraints() {
+        return 0 ;
+    }
+
+    @Override
+    public String name() {
+        return "StaticCSO";
     }
 
     /**

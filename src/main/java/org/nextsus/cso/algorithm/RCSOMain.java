@@ -1,5 +1,7 @@
 package org.nextsus.cso.algorithm;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.nextsus.cso.algorithm.mocell.HybridMOCell;
 import org.nextsus.cso.algorithm.moead.HybridMOEAD;
 import org.nextsus.cso.algorithm.nsgaii.HybridNSGAII;
@@ -30,8 +32,6 @@ import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.legacy.qualityindicator.impl.hypervolume.impl.PISAHypervolume;
 import org.uma.jmetal.util.neighborhood.impl.C9;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class RCSOMain {
     public static void main(String[] args) {

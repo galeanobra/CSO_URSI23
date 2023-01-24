@@ -1,11 +1,9 @@
 package org.nextsus.cso.problem;
 
 import org.nextsus.cso.solution.BinaryCSOSolution;
-import org.uma.jmetal.problem.AbstractGenericProblem;
 
 @SuppressWarnings("serial")
-public abstract class AbstractBinaryCSOProblem extends AbstractGenericProblem<BinaryCSOSolution>
-        implements BinaryCSOProblem {
+public abstract class AbstractBinaryCSOProblem implements BinaryCSOProblem {
 
   @Override
   public int getBitsFromVariable(int index) {
@@ -15,7 +13,7 @@ public abstract class AbstractBinaryCSOProblem extends AbstractGenericProblem<Bi
   @Override
   public int getTotalNumberOfBits() {
     int count = 0;
-    for (int i = 0; i < this.getNumberOfVariables(); i++) {
+    for (int i = 0; i < this.numberOfVariables(); i++) {
       count += this.getListOfBitsPerVariable().get(i);
     }
 
@@ -24,6 +22,6 @@ public abstract class AbstractBinaryCSOProblem extends AbstractGenericProblem<Bi
 
   @Override
   public BinaryCSOSolution createSolution() {
-    return new BinaryCSOSolution(getListOfBitsPerVariable(), getNumberOfObjectives(), getNumberOfConstraints());
+    return new BinaryCSOSolution(getListOfBitsPerVariable(), numberOfObjectives(), numberOfConstraints());
   }
 }

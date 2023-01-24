@@ -1,22 +1,34 @@
-package org.nextsus.cso.algorithm.sparseea;
+package org.nextsus.cso.auto.algorithm;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
-import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
+import org.uma.jmetal.component.catalogue.common.termination.Termination;
+import org.uma.jmetal.component.catalogue.common.termination.impl.TerminationByEvaluations;
 import org.uma.jmetal.operator.selection.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.Solution;
-import org.uma.jmetal.util.SolutionListUtils;
+import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.comparator.RankingAndCrowdingDistanceComparator;
 import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
 import org.uma.jmetal.util.densityestimator.impl.CrowdingDistanceDensityEstimator;
+import org.uma.jmetal.util.observable.Observable;
+import org.uma.jmetal.util.observable.impl.DefaultObservable;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.pseudorandom.RandomGenerator;
 import org.uma.jmetal.util.ranking.Ranking;
 import org.uma.jmetal.util.ranking.impl.FastNonDominatedSortRanking;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of SparseEA.
@@ -25,7 +37,7 @@ import java.util.stream.Collectors;
  * IEEE Transactions on Evolutionary Computation, vol. 24, no. 2,
  * pp. 380-393, April 2020.
  */
-public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, List<S>> {
+public class AutoSparseEACSO<S extends Solution<?>> {
 
     //    private final List<Solution> tabu;
 //    private int tabuSize;
@@ -33,7 +45,7 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
     protected int maxEvaluations;
     protected int populationSize;
     protected double crossoverProb;
-    protected double mutationProb;
+    protected double mutationProbFactor;
     protected SelectionOperator<List<S>, S> selectionOperator;
     protected int numberOfBits;
 
@@ -43,26 +55,39 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
 
     protected Comparator<S> dominanceComparator;
 
+    protected Archive<BinaryCSOSolution> archive;
+
+    protected List<BinaryCSOSolution> result;
+
+    protected long time;
+
+    public final Observable<Map<String, Object>> observable;
+    private final Map<String, Object> attributes;
+
     /**
      * Constructor
      *
      * @param problem Problem to solve
      */
-    public HybridSparseEA(Problem<S> problem, int maxEvalutaions, int populationSize, double crossoverProb, double mutationProb, SelectionOperator<List<S>, S> selectionOperator, int numberOfBits) {
-        super(problem);
+    public AutoSparseEACSO(Problem<S> problem, int maxEvalutaions, int populationSize, double crossoverProb, double mutationProb, SelectionOperator<List<S>, S> selectionOperator, int numberOfBits, Archive<BinaryCSOSolution> archive) {
 //        tabu = new ArrayList<>();
 //        tabuSize = 5;
         this.problem = problem;
         this.maxEvaluations = maxEvalutaions;
         this.populationSize = populationSize;
         this.crossoverProb = crossoverProb;
-        this.mutationProb = mutationProb;
+        this.mutationProbFactor = mutationProb;
         this.selectionOperator = selectionOperator;
         this.numberOfBits = numberOfBits;
+        this.archive = archive;
+        this.result = null;
+        this.time = 0;
 
         this.evaluations = 0;
 
         this.dominanceComparator = new DefaultDominanceComparator<>();
+        this.observable = new DefaultObservable<>("SparseEA Algorithm");
+        this.attributes = new HashMap<>();
     }
 
     /**
@@ -71,9 +96,10 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
      * @return a <code>SolutionSet</code> that is a set of non dominated
      * solutions as a result of the algorithm execution
      */
-    public List<S> execute() {
+    public void execute() {
+        long startTime = System.nanoTime();
+
         List<BinaryCSOSolution> population;
-        List<BinaryCSOSolution> offspringPopulation;
         List<BinaryCSOSolution> union;
 
         int[] score;                        // Score of the decision variables
@@ -131,8 +157,23 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
 
         distance.compute(population);
 
+        Termination termination = new TerminationByEvaluations(this.maxEvaluations) ;
+
+        List<List<Double>> referencePoints = new ArrayList<>();
+        referencePoints.add(List.of(0.005, -2800.0));
+        //Termination termination= new TerminationByAspirationPoint(referencePoints, 55000) ;
+
         // Generations
-        while (this.evaluations < this.maxEvaluations) {
+        System.out.println("Max evaluations: " + this.maxEvaluations) ;
+
+        attributes.put("EVALUATIONS", this.evaluations);
+        attributes.put("POPULATION", population);
+
+        observable.setChanged();
+        observable.notifyObservers(attributes);
+        //System.out.println("Max evaluations:" + maxEvaluations); ;
+        //while (this.evaluations < this.maxEvaluations) {
+        while (!termination.isMet(attributes)) {
             List<BinaryCSOSolution> _population = new ArrayList<>(2 * populationSize);   // P' -> 2 * N population
             mask = new boolean[populationSize * 2][d];
             for (int i = 0; i < 2 * populationSize; i++) {                              // Fill _population with 2N parents from population
@@ -182,14 +223,27 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
                 for (int k = 0; k < remain; k++)
                     population.add(front.get(k));
             }
+
+            System.out.println(this.evaluations) ;
+
+            attributes.put("EVALUATIONS", this.evaluations);
+            attributes.put("POPULATION", population);
+
+            observable.setChanged();
+            observable.notifyObservers(attributes);
         }
 
         ranking = new FastNonDominatedSortRanking<>(this.dominanceComparator).compute((List<S>) population);
         for (S binarySolution : ranking.getSubFront(0)) problem.evaluate(binarySolution);
+
+        if (archive != null)
+            population.forEach(solution -> archive.add(solution.copy()));
+
         evaluations += ranking.getSubFront(0).size();
 
-        return ranking.getSubFront(0);
-//        return population;
+        time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+
+        result = archive != null ? archive.solutions() : (List<BinaryCSOSolution>) ranking.getSubFront(0);
     }
 
     /**
@@ -213,6 +267,9 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
 //            problem.evaluateConstraints(s);
             population.add(s);
         }
+
+        if (archive != null)
+            population.forEach(solution -> archive.add(solution.copy()));
 
         evaluations += populationSize;
 
@@ -239,11 +296,15 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
             qMask[i] = mask[(_population.size() / 2 - 1) + i];
 
             //TODO
-            if (countBool(pMask[i], true) == 0) pMask[i][JMetalRandom.getInstance().nextInt(0, pMask[i].length - 1)] = true;
-            if (countBool(qMask[i], true) == 0) qMask[i][JMetalRandom.getInstance().nextInt(0, qMask[i].length - 1)] = true;
+            if (countBool(pMask[i], true) == 0)
+                pMask[i][JMetalRandom.getInstance().nextInt(0, pMask[i].length - 1)] = true;
+            if (countBool(qMask[i], true) == 0)
+                qMask[i][JMetalRandom.getInstance().nextInt(0, qMask[i].length - 1)] = true;
 
-            if (countBool(pMask[i], false) == 0) pMask[i][JMetalRandom.getInstance().nextInt(0, pMask[i].length - 1)] = false;
-            if (countBool(qMask[i], false) == 0) qMask[i][JMetalRandom.getInstance().nextInt(0, qMask[i].length - 1)] = false;
+            if (countBool(pMask[i], false) == 0)
+                pMask[i][JMetalRandom.getInstance().nextInt(0, pMask[i].length - 1)] = false;
+            if (countBool(qMask[i], false) == 0)
+                qMask[i][JMetalRandom.getInstance().nextInt(0, qMask[i].length - 1)] = false;
             //TODO
 
             oMask[i] = mask[i];
@@ -251,7 +312,7 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
 
         // Crossover
         for (int i = 0; i < _population.size() / 2; i++) {
-            if (JMetalRandom.getInstance().nextDouble() < 0.5) {
+            if (JMetalRandom.getInstance().nextDouble() < crossoverProb) {
                 int[] index = getIndexCrossover(pMask[i], invertArray(qMask[i]));
                 if (index != null) {
                     if (score[index[0]] > score[index[1]]) oMask[i][index[0]] = false;
@@ -269,11 +330,13 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
         // Mutation
         for (int i = 0; i < _population.size() / 2; i++) {
             //TODO
-            if (countBool(oMask[i], true) == 0) oMask[i][JMetalRandom.getInstance().nextInt(0, oMask[i].length - 1)] = true;
-            if (countBool(oMask[i], false) == 0) oMask[i][JMetalRandom.getInstance().nextInt(0, oMask[i].length - 1)] = false;
+            if (countBool(oMask[i], true) == 0)
+                oMask[i][JMetalRandom.getInstance().nextInt(0, oMask[i].length - 1)] = true;
+            if (countBool(oMask[i], false) == 0)
+                oMask[i][JMetalRandom.getInstance().nextInt(0, oMask[i].length - 1)] = false;
             //TODO
 
-            if (JMetalRandom.getInstance().nextDouble() < 0.5) {
+            if (JMetalRandom.getInstance().nextDouble() < mutationProbFactor / numberOfBits) {
                 int[] index = randomFromNonZero(oMask[i]);
                 if (score[index[0]] > score[index[1]]) oMask[i][index[0]] = false;
                 else oMask[i][index[1]] = false;
@@ -298,6 +361,10 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
             _population_variation.add(s);
 
             evaluations++;
+        }
+
+        if (archive != null) {
+            population.forEach(solution -> archive.add(solution.copy()));
         }
 
         return _population_variation;
@@ -366,43 +433,11 @@ public class HybridSparseEA<S extends Solution<?>> extends AbstractGeneticAlgori
         return counter;
     }
 
-    @Override
-    protected void initProgress() {
-
+    public List<BinaryCSOSolution> getResult() {
+        return result;
     }
 
-    @Override
-    protected void updateProgress() {
-
-    }
-
-    @Override
-    protected boolean isStoppingConditionReached() {
-        return false;
-    }
-
-    @Override
-    protected List<S> evaluatePopulation(List<S> population) {
-        return null;
-    }
-
-    @Override
-    protected List<S> replacement(List<S> population, List<S> offspringPopulation) {
-        return null;
-    }
-
-    @Override
-    public List<S> getResult() {
-        return SolutionListUtils.getNonDominatedSolutions(population);
-    }
-
-    @Override
-    public String getName() {
-        return "SparseEA";
-    }
-
-    @Override
-    public String getDescription() {
-        return "Sparse Evolutionary Algorithm";
+    public long getTotalComputingTime() {
+        return time;
     }
 }

@@ -7,17 +7,25 @@ import org.uma.jmetal.util.binarySet.BinarySet;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.nextsus.cso.solution.BinaryCSOSolution;
+import org.uma.jmetal.problem.doubleproblem.impl.AbstractDoubleProblem;
+import org.uma.jmetal.solution.doublesolution.DoubleSolution;
+import org.uma.jmetal.util.binarySet.BinarySet;
 
 public class RStaticCSO extends AbstractDoubleProblem {
 
     private StaticCSO problem;
 
+    public RStaticCSO() {
+        this(new StaticCSO("main.properties", "LL", 0)) ;
+    }
+
     public RStaticCSO(StaticCSO problem) {
         this.problem = problem;
 
-        setNumberOfObjectives(problem.getNumberOfObjectives());
-        setNumberOfConstraints(problem.getNumberOfConstraints());
-        setName("RStaticCSO");
+        numberOfObjectives(problem.numberOfObjectives());
+        numberOfConstraints(problem.numberOfConstraints());
+        name("RStaticCSO");
 
         List<Double> lowerLimit = new ArrayList<>(problem.bits);
         List<Double> upperLimit = new ArrayList<>(problem.bits);
@@ -27,7 +35,7 @@ public class RStaticCSO extends AbstractDoubleProblem {
             upperLimit.add(1.0);
         }
 
-        setVariableBounds(lowerLimit, upperLimit);
+        variableBounds(lowerLimit, upperLimit);
     }
 
     @Override

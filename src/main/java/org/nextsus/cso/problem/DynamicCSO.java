@@ -32,10 +32,6 @@ public class DynamicCSO extends CSO {
 
         bits = udn_.getTotalNumberOfActivableCells();
 
-        setNumberOfVariables(1);
-        setNumberOfObjectives(3);
-        setNumberOfConstraints(0);
-        setName("DynamicCSO");
         run_ = run;
         epochs_ = epochs;
 
@@ -43,6 +39,27 @@ public class DynamicCSO extends CSO {
         if (udn_.getMobilityType().equalsIgnoreCase("shanghai"))
             shanghai_ = true;
     }
+
+    @Override
+    public int numberOfVariables() {
+        return 1 ;
+    }
+
+    @Override
+    public int numberOfObjectives() {
+        return 3 ;
+    }
+
+    @Override
+    public int numberOfConstraints() {
+        return 0 ;
+    }
+
+    @Override
+    public String name() {
+        return "DynamicCSO";
+    }
+
 
     /**
      * Evaluates a solution.
