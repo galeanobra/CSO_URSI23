@@ -114,7 +114,7 @@ public class StaticCSO extends CSO {
         boolean hasActiveCells;
         double maintenancePower = 2000; // mW
 
-        for (List<BTS> btss : udn_.btss_.values()) {
+        for (List<BTS> btss : udn_.btss.values()) {
             for (BTS bts : btss) {
                 hasActiveCells = false;
                 for (Sector sector : bts.getSectors()) {
@@ -135,7 +135,7 @@ public class StaticCSO extends CSO {
         }
 
         //mW -> W -> kW -> MW
-        sum /= 1000000000;
+        sum /= 1000000;
         //System.out.println("Power consumption = " + sum);
 
         return sum;

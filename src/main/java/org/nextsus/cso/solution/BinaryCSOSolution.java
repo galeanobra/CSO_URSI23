@@ -32,6 +32,13 @@ public class BinaryCSOSolution extends DefaultBinarySolution {
         this.previousUesToCellAssignment_ = solution.previousUesToCellAssignment_;
     }
 
+    public BinaryCSOSolution(BinarySet binarySet, List<Double> objectives) {
+        super(List.of(binarySet.size()), objectives.size());
+        for (int i = 0; i < objectives.size(); i++) {
+            objectives()[i] = objectives.get(i);
+        }
+    }
+
     public void setUEsToCellAssignment(List<Cell> assignment) {
         previousUesToCellAssignment_ = currentUesToCellAssignment_;
         currentUesToCellAssignment_ = assignment;

@@ -11,7 +11,6 @@ import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.util.binarySet.BinarySet;
 import org.uma.jmetal.util.pseudorandom.impl.JavaRandomGenerator;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -54,7 +53,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
     double powerConsumptionBasedOnTransmittedPower() {
         double sum = 0.0;
 
-        for (List<Cell> cells : udn_.cells_.values()) {
+        for (List<Cell> cells : udn_.cells.values()) {
             for (Cell c : cells) {
                 if (c.isActive()) {
                     sum += 4.7 * c.getSector().getTransmittedPower();
@@ -78,7 +77,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
     double powerConsumptionPiovesan() {
         double sum = 0.0;
 
-        for (List<Cell> cells : udn_.cells_.values()) {
+        for (List<Cell> cells : udn_.cells.values()) {
             for (Cell c : cells) {
                 Sector sector = c.getSector();
                 if (c.isActive()) {
@@ -124,7 +123,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
 
         // 2. Assign users to cells, to compute the BW allocated to them
         for (User u : this.udn_.getUsers()) {
-            u.setServingCell(udn_.getGridPoint(u.getX(), u.getY(), u.getZ()).getCellWithHigherSINR());
+            u.setServingCell(udn_.getGridPoint(u.getX(), u.getY(), u.getZ()).getCellWithHigherSNR());
             u.getServingCell().addUserAssigned();
 
             // dynamic
@@ -152,7 +151,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
     private double numberOfActiveCells() {
         int count = 0;
 
-        for (List<Cell> cells : udn_.cells_.values()) {
+        for (List<Cell> cells : udn_.cells.values()) {
             for (Cell c : cells) {
                 if (c.isActive()) {
                     count++;
@@ -176,8 +175,8 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
 
         for (int i = 0; i < l.size(); i++) {
             Point p = l.get(i);
-            Cell c = p.getCellWithHigherSINR();
-            double sinr = p.computeSINR(c);
+            Cell c = p.getCellWithHigherSNR();
+            double sinr = p.computeSNR(c);
             sinr_list[i] = sinr;
 
         }
@@ -186,8 +185,8 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
         for (int i = 0; i < l.size(); i++) {
             for (int j = 0; j < l.size(); j++) {
                 Point p_ = l.get(j);
-                Cell c_ = p_.getCellWithHigherSINR();
-                double sinr_ = p_.computeSINR(c_);
+                Cell c_ = p_.getCellWithHigherSNR();
+                double sinr_ = p_.computeSNR(c_);
                 if (Double.compare(sinr_, sinr_list[i]) == 0) {
                     index = j;
                     break;
@@ -217,13 +216,13 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                 // Assign users to cells, to compute the BW allocated to them
                 for (User u : this.udn_.getUsers()) {
                     Point p = udn_.getGridPoint(u.getX(), u.getY(), u.getZ());
-                    Cell c = p.getCellWithHigherSINR();
+                    Cell c = p.getCellWithHigherSNR();
                     c.addUserAssigned();
                     u.setServingCell(c);
                 }
 
-                for (double frequency : this.udn_.cells_.keySet()) {
-                    for (Cell c : udn_.cells_.get(frequency)) {
+                for (double frequency : this.udn_.cells.keySet()) {
+                    for (Cell c : udn_.cells.get(frequency)) {
                         if (c.getAssignedUsers() == 0) c.setActivation(false);
                     }
                 }
@@ -247,7 +246,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                 // Assign users to cells
                 for (User u : this.udn_.getUsers()) {
                     Point p = udn_.getGridPoint(u.getX(), u.getY(), u.getZ());
-                    Cell c = p.getCellWithHigherSINR();
+                    Cell c = p.getCellWithHigherSNR();
                     c.addUserAssigned();
                     u.setServingCell(c);
                 }
@@ -256,20 +255,20 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                     BTS b = u.getServingCell().getBTS();
                     Cell best = u.getServingCell();
                     Point p = udn_.getGridPoint(u.getX(), u.getY(), u.getZ());
-                    double max_sinr = p.computeSINR(u.getServingCell());
+                    double max_sinr = p.computeSNR(u.getServingCell());
 
                     for (Sector s : b.getSectors()) {
                         for (Cell c : s.getCells()) {
                             if (!c.equals(u.getServingCell())) {
                                 if (c.getType() == FEMTO) {
-                                    double sinr = p.computeSINR(c);
+                                    double sinr = p.computeSNR(c);
                                     if (sinr >= max_sinr) {
                                         best = c;
                                         max_sinr = sinr;
                                     }
                                 } else if (c.getType() == PICO) {
                                     if (u.getServingCell().getType() == PICO || u.getServingCell().getType() == MICRO || u.getServingCell().getType() == MACRO) {
-                                        double sinr = p.computeSINR(c);
+                                        double sinr = p.computeSNR(c);
                                         if (sinr >= max_sinr) {
                                             best = c;
                                             max_sinr = sinr;
@@ -277,7 +276,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                                     }
                                 } else if (c.getType() == MICRO) {
                                     if (u.getServingCell().getType() == MICRO || u.getServingCell().getType() == MACRO) {
-                                        double sinr = p.computeSINR(c);
+                                        double sinr = p.computeSNR(c);
                                         if (sinr >= max_sinr) {
                                             best = c;
                                             max_sinr = sinr;
@@ -319,7 +318,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                 // Assign users to cells, to compute the BW allocated to them
                 for (User u : this.udn_.getUsers()) {
                     Point p = udn_.getGridPoint(u.getX(), u.getY(), u.getZ());
-                    Cell c = p.getCellWithHigherSINR();
+                    Cell c = p.getCellWithHigherSNR();
                     c.addUserAssigned();
                     u.setServingCell(c);
                 }
@@ -335,10 +334,10 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                     if ((u.getServingCell().getType() != FEMTO) || (u.getServingCell().getType() != PICO)) {
                         current = u.getServingCell();
                         user_location = udn_.getGridPoint(u.getX(), u.getY(), u.getZ());
-                        bestCells = user_location.getCellsWithBestSINRs();
+                        bestCells = user_location.getCellsWithBestSNRs();
                         for (Map.Entry<Double, Cell> actualEntry : bestCells.entrySet()) {
                             alternative = actualEntry.getValue();
-                            if (user_location.computeSINR(alternative) > threshold) {
+                            if (user_location.computeSNR(alternative) > threshold) {
                                 if ((alternative.getType() == FEMTO) || (alternative.getType() == PICO)) {
                                     u.setServingCell(alternative);
                                     alternative.addUserAssigned();
@@ -378,7 +377,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                 // Assign users to cells, to compute the BW allocated to them
                 for (User u : this.udn_.getUsers()) {
                     Point p = udn_.getGridPoint(u.getX(), u.getY(), u.getZ());
-                    Cell c = p.getCellWithHigherSINR();
+                    Cell c = p.getCellWithHigherSNR();
                     c.addUserAssigned();
                     u.setServingCell(c);
                 }
@@ -394,10 +393,10 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
                     if ((u.getServingCell().getType() != FEMTO) || (u.getServingCell().getType() != PICO)) {
                         current = u.getServingCell();
                         user_location = udn_.getGridPoint(u.getX(), u.getY(), u.getZ());
-                        bestCells = user_location.getCellsWithBestSINRs();
+                        bestCells = user_location.getCellsWithBestSNRs();
                         for (Map.Entry<Double, Cell> actualEntry : bestCells.entrySet()) {
                             alternative = actualEntry.getValue();
-                            if (user_location.computeSINR(alternative) > threshold) {
+                            if (user_location.computeSNR(alternative) > threshold) {
                                 if ((alternative.getType() == FEMTO) || (alternative.getType() == PICO)) {
                                     u.setServingCell(alternative);
                                     alternative.addUserAssigned();
@@ -435,7 +434,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
 
             if (udn_.getTotalNumberOfActiveCells() > 0) {
                 // v1
-                for (List<BTS> btss : udn_.btss_.values()) {
+                for (List<BTS> btss : udn_.btss.values()) {
                     for (BTS bts : btss) {
                         if (bts.getNumberOfActiveCells() == 1) {
                             //Turn off the active cell
@@ -466,7 +465,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
         BinarySet cso = solution.variables().get(0);
         int bts = 0;
 
-        for (List<Cell> cells : udn_.cells_.values()) {
+        for (List<Cell> cells : udn_.cells.values()) {
             for (Cell c : cells) {
                 if (c.getType() != CellType.MACRO) {
                     cso.set(bts, c.isActive());
