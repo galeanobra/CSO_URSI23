@@ -11,6 +11,10 @@ public class RStaticCSO extends AbstractDoubleProblem {
 
     private StaticCSO problem;
 
+    public RStaticCSO() {
+        this(new StaticCSO("main.properties", "LL", 0)) ;
+    }
+
     public RStaticCSO(StaticCSO problem) {
         this.problem = problem;
 

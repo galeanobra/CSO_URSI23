@@ -19,7 +19,7 @@ import org.uma.jmetal.util.observer.impl.RunTimeChartObserver;
  *
  * @author Antonio J. Nebro (ajnebro@uma.es)
  */
-public class NSGAIStoppingByAspirationPointRunner {
+public class NSGAIIStoppingByAspirationPointRunner {
   public static void main(String[] args) {
     String referenceFrontFileName = "ReferenceFront.csv" ;
 
