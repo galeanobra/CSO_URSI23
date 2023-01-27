@@ -166,6 +166,15 @@ public class User {
         this.x_ = (int) (beta * x2 + (1 - beta) * x1);
         this.y_ = (int) (beta * y2 + (1 - beta) * y1);
         this.z_ = (int) (beta * z2 + (1 - beta) * z1);
+
+        if (x_ < 0) x_ = 0;
+        if (x_ > udn.gridPointsX) x_ = udn.gridPointsX;
+
+        if (y_ < 0) y_ = 0;
+        if (y_ > udn.gridPointsY) y_ = udn.gridPointsY;
+
+        if (z_ < 0) z_ = 0;
+        if (z_ > udn.gridPointsZ) z_ = udn.gridPointsZ;
     }
 
     public double getTrafficDemand() {
