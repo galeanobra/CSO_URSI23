@@ -73,7 +73,7 @@ public class StaticCSO extends CSO {
             udn_.setCellActivation(cso);
 
             // Recompute the total received power for each user point
-            udn_.computeSignaling();
+//            udn_.computeSignaling();
 
             double capacity = networkCapacity(solution);
             double powerConsumption = powerConsumptionStatic();

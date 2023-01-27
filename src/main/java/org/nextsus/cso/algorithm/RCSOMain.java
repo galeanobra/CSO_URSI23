@@ -2,6 +2,7 @@ package org.nextsus.cso.algorithm;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.nextsus.cso.algorithm.mocell.HybridMOCell;
 import org.nextsus.cso.algorithm.moead.HybridMOEAD;
 import org.nextsus.cso.algorithm.nsgaii.HybridNSGAII;

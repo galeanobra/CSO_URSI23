@@ -1,6 +1,7 @@
 package org.nextsus.cso.algorithm;
 
 import java.util.List;
+
 import org.nextsus.cso.algorithm.mocell.HybridMOCell;
 import org.nextsus.cso.algorithm.moead.HybridMOEAD;
 import org.nextsus.cso.algorithm.nsgaii.HybridNSGAII;
@@ -77,12 +78,8 @@ public class CSOMain {
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
         String dir = alg + "_b";
         String name = alg + "_b_" + run;
-        String FUN = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".FUN." + taskID + "." + jobID + ".csv" : "out/" + scenario + "/" + dir + "/FUN/" + name + ".FUN." + taskID + "." + jobID + ".csv";
-        String VAR = System.getProperty("os.name").toLowerCase().contains("win") ? name + ".VAR." + taskID + "." + jobID + ".csv" : "out/" + scenario + "/" + dir + "/VAR/" + name + ".VAR." + taskID + "." + jobID + ".csv";
-
-        // For local debug, comment previous lines and uncomment these
-//        String FUN = "FUN_" + taskID + ".csv";
-//        String VAR = "VAR_" + taskID + ".csv";
+        String FUN = name + ".FUN." + taskID + "." + jobID + ".csv";
+        String VAR = name + ".VAR." + taskID + "." + jobID + ".csv";
 
         new SolutionListOutput(population).setVarFileOutputContext(new DefaultFileOutputContext(VAR, ",")).setFunFileOutputContext(new DefaultFileOutputContext(FUN, ",")).print();
 
