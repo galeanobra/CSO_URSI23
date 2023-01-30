@@ -223,16 +223,19 @@ public class User {
         Point p = udn.getGridPoint(x_, y_, z_);
         Cell servingCell = this.getServingCell();
 
-        double sinr = p.computeSNR(servingCell);
-        int nt = servingCell.getNumAntTx();
-        double capacity = 0;
-        double[] singularValues = servingCell.getSingularValuesH();
+        double snr = p.computeSNR(servingCell);
+        if (snr >= 0) {
+            int nt = servingCell.getNumAntTx();
+            double capacity = 0;
+            double[] singularValues = servingCell.getSingularValuesH();
 
-        for (double singularValue : singularValues) {
-            capacity += Math.log1p((sinr * singularValue) / nt) / Math.log(2.0);
-        }
+            for (double singularValue : singularValues) {
+                capacity += Math.log1p((snr * singularValue) / nt) / Math.log(2.0);
+            }
 
-        return bw * capacity;
+            return bw * capacity;
+        } else return 0;
+
     }
 
     public Cell getServingCell() {
