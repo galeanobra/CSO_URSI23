@@ -64,7 +64,7 @@ public class CSOMain {
             case "mocell" -> new HybridMOCell<>(problem, numEvals, popSize, new CrowdingDistanceArchive<>(popSize), new C9<>((int) Math.sqrt(popSize), (int) Math.sqrt(popSize)), crossover, mutation, selection, new SequentialSolutionListEvaluator<>());
             case "moead" -> new HybridMOEAD<>(problem, popSize, popSize, numEvals, mutation, crossover, AbstractMOEAD.FunctionType.TCHE, "", 0.1, 2, 20);
             case "smsemoa" -> new HybridSMSEMOA<>(problem, numEvals, popSize, 100.0, crossover, mutation, selection, new DefaultDominanceComparator<>(), new PISAHypervolume<>());
-            case "sparseea" -> new HybridSparseEA<>(problem, numEvals, popSize, crossoverProbability, mutationProbability, new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>()), ((StaticCSO) problem).getTotalNumberOfActivableCells());
+            case "sparseea" -> new HybridSparseEA<>(problem, numEvals, popSize, crossoverProbability, mutationProbability, new BinaryTournamentSelection<>(new RankingAndCrowdingDistanceComparator<>()), problem.getTotalNumberOfActivableCells());
             default -> new HybridNSGAII<>(problem, numEvals, popSize, popSize, popSize, crossover, mutation, selection, new DefaultDominanceComparator<>(), new SequentialSolutionListEvaluator<>());
         };
 
