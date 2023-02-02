@@ -88,11 +88,6 @@ public class CSOMain {
         // To remove infeasible solutions (both objectives are 0.0)
         population.removeIf(s -> s.objectives()[0] == 0.0 && s.objectives()[1] == 0.0);
 
-        // To change the sign of the capacity
-        population.forEach((s) -> {
-            s.objectives()[1] = -s.objectives()[1];
-        });
-
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
         String name = alg + "_b_" + run;
         String FUN = name + ".FUN." + taskID + "." + jobID + ".csv";
