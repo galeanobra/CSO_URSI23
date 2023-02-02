@@ -7,6 +7,7 @@ import org.uma.jmetal.util.binarySet.BinarySet;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.problem.doubleproblem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.doublesolution.DoubleSolution;
@@ -17,7 +18,7 @@ public class RStaticCSO extends AbstractDoubleProblem {
     private StaticCSO problem;
 
     public RStaticCSO() {
-        this(new StaticCSO("main.properties", "LL", 0)) ;
+        this(new StaticCSO("main.properties", "LL", 0));
     }
 
     public RStaticCSO(StaticCSO problem) {
@@ -60,5 +61,9 @@ public class RStaticCSO extends AbstractDoubleProblem {
 
     public int getRun() {
         return problem.run_;
+    }
+
+    public StaticCSO getStaticCSO() {
+        return problem;
     }
 }

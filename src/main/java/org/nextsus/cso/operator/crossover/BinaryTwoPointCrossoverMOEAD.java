@@ -1,4 +1,4 @@
-package org.nextsus.cso.operator;
+package org.nextsus.cso.operator.crossover;
 
 import java.util.ArrayList;
 import java.util.List;

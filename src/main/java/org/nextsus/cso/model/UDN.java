@@ -35,7 +35,11 @@ public abstract class UDN {
     public int gridPointsZ;
     public Map<Double, List<Cell>> cells;
     public Map<Double, List<BTS>> btss;
-    public List<Integer[]> cellOrder;
+    public List<BTS> btsList;
+    public List<Sector> sectorList;
+    public Map<String, List<BTS>> towerList;
+    public List<int[]> cellOrder;
+
     public Map<Point, Map<Double, List<Cell>>> cellsOfInterestByPoint;
     public double signalPowerThreshold = -90; // 0.000000000001;    // 1 pW
 
@@ -200,6 +204,9 @@ public abstract class UDN {
         this.cells = new HashMap<>();
         this.btss = new HashMap<>();
         this.cellOrder = new ArrayList<>();
+        this.btsList = new ArrayList<>();
+        this.sectorList = new ArrayList<>();
+        this.towerList = new HashMap<>();
         this.lastfreq = 0;
 
         for (int i = 0; i < numberOfCellTypes; i++) {
@@ -208,11 +215,11 @@ public abstract class UDN {
         int totalCells = 0;
         int totalBS = 0;
 
-        for(double d :cells.keySet()){
+        for (double d : cells.keySet()) {
             totalCells += cells.get(d).size();
             totalBS += btss.get(d).size();
         }
-        System.out.println("\tTotal cells: " +totalCells + ", Total BS: " + totalBS);
+        System.out.println("\tTotal cells: " + totalCells + ", Total BS: " + totalBS);
     }
 
     /**
@@ -283,7 +290,17 @@ public abstract class UDN {
                 z = (cellTypeName.equalsIgnoreCase("femto") || cellTypeName.equalsIgnoreCase("pico")) ? 1 : 2;
 
                 BTS bts = new BTS(x, y, z, cellTypeName, workingFrequency, radiationPatternFile, this, cellname);
+                btsList.add(bts);
+
                 bts.addSectors(cellTypeName, cellname, numChainsTX, numSectors, transmittedPower, alfa, beta, delta, transmitterGain, receptorGain, workingFrequency, coverageRadius);
+                sectorList.addAll(bts.getSectors());
+
+                // Add BTS to tower map
+
+                List<BTS> tmp = towerList.get(x + "-" + y);
+                tmp.add(bts);
+                towerList.put(x + "-" + y, tmp);
+
 
                 //set cell (RF Chain) angle shift depending on BTS and antenna array configuration
                 int cellIndex = 0;
@@ -302,7 +319,7 @@ public abstract class UDN {
                         cell.setSingularValuesH(singularValuesH);
 
                         cells.add(cell);
-                        cellOrder.add(new Integer[]{bts.getX(), bts.getY(), bts.getZ()});
+                        cellOrder.add(new int[]{cell.getSector().getX(), cell.getSector().getY(), cell.getSector().getZ()});
                         cellIndex++;
                     }
                 }
@@ -318,6 +335,8 @@ public abstract class UDN {
 
         for (int c = btss.size(); c < numBtss; c++) {
             int x, y, z;
+
+            //TODO rerandomize if point has BTS installed
             x = random.nextInt(gridPointsX);
             y = random.nextInt(gridPointsY);
 
@@ -325,8 +344,15 @@ public abstract class UDN {
             z = (cellTypeName.equalsIgnoreCase("femto") || cellTypeName.equalsIgnoreCase("pico")) ? 1 : 2;
 
             BTS bts = new BTS(x, y, z, cellTypeName, workingFrequency, radiationPatternFile, this, cellname);
+            btsList.add(bts);
 
             bts.addSectors(cellTypeName, cellname, numChainsTX, numSectors, transmittedPower, alfa, beta, delta, transmitterGain, receptorGain, workingFrequency, coverageRadius);
+            sectorList.addAll(bts.getSectors());
+
+            // Add BTS to tower map
+            List<BTS> tmp = new ArrayList<>();
+            tmp.add(bts);
+            towerList.put(x + "-" + y, tmp);
 
             //set cell (RF Chain) angle shift depending on BTS and antenna array configuration
             int cellIndex = 0;
@@ -345,7 +371,7 @@ public abstract class UDN {
                     cell.setSingularValuesH(singularValuesH);
 
                     cells.add(cell);
-                    cellOrder.add(new Integer[]{bts.getX(), bts.getY(), bts.getZ()});
+                    cellOrder.add(new int[]{cell.getSector().getX(), cell.getSector().getY(), cell.getSector().getZ()});
                     cellIndex++;
                 }
             }
@@ -1302,8 +1328,24 @@ public abstract class UDN {
         return cells;
     }
 
-    public List<Integer[]> getCellOrder() {
+    public List<int[]> getCellOrder() {
         return cellOrder;
+    }
+
+    public List<BTS> getBTSsList() {
+        return btsList;
+    }
+
+    public List<Sector> getSectorsList() {
+        return sectorList;
+    }
+
+    public List<List<BTS>> getTowersList() {
+        List<List<BTS>> towers = new ArrayList<>(towerList.keySet().size());
+        for (String i : towerList.keySet()) {
+            towers.add(towerList.get(i));
+        }
+        return towers;
     }
 
     /**

@@ -1,7 +1,7 @@
 package org.nextsus.cso.model;
 
 import org.junit.jupiter.api.Test;
-import org.nextsus.cso.operator.BinaryTwoPointCrossover;
+import org.nextsus.cso.operator.crossover.BinaryTwoPointCrossover;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.crossover.CrossoverOperator;

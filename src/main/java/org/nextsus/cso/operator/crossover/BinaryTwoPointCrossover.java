@@ -1,4 +1,4 @@
-package org.nextsus.cso.operator;
+package org.nextsus.cso.operator.crossover;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.nextsus.cso.solution.BinaryCSOSolution;

@@ -7,8 +7,10 @@ import org.nextsus.cso.algorithm.moead.HybridMOEAD;
 import org.nextsus.cso.algorithm.nsgaii.HybridNSGAII;
 import org.nextsus.cso.algorithm.smsemoa.HybridSMSEMOA;
 import org.nextsus.cso.algorithm.sparseea.HybridSparseEA;
-import org.nextsus.cso.operator.BinaryTwoPointCrossover;
-import org.nextsus.cso.operator.BinaryTwoPointCrossoverMOEAD;
+import org.nextsus.cso.operator.crossover.*;
+import org.nextsus.cso.operator.mutation.BSM;
+import org.nextsus.cso.operator.mutation.GeographicMutation;
+import org.nextsus.cso.operator.mutation.SectorM;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.algorithm.Algorithm;
@@ -50,13 +52,22 @@ public class CSOMain {
         double crossoverProbability = 0.9;
         double mutationProbability = 1.0 / problem.getTotalNumberOfActivableCells();
 
-        // Crossover
-        if (alg.equals("moead")) {
-            crossover = new BinaryTwoPointCrossoverMOEAD<BinaryCSOSolution>(crossoverProbability);
-        } else {
-            crossover = new BinaryTwoPointCrossover<BinaryCSOSolution>(crossoverProbability);
-        }
-        mutation = new BitFlipMutation<>(mutationProbability);
+        // Crossover and mutation
+//        if (alg.equals("moead")) {
+//            crossover = new BinaryTwoPointCrossoverMOEAD<BinaryCSOSolution>(crossoverProbability);
+//        } else {
+//            crossover = new BinaryTwoPointCrossover<BinaryCSOSolution>(crossoverProbability);
+//        }
+//
+//        mutation = new BitFlipMutation<>(mutationProbability);
+
+//        crossover = new RGX<>(crossoverProbability, 50, problem.getUDN());
+//        crossover = new SectorX<>(crossoverProbability, 3, problem.getUDN());
+        crossover = new TowerX<>(crossoverProbability, 1, problem.getUDN());
+
+//        mutation = new GeographicMutation<>(crossoverProbability, 50, problem.getUDN());
+        mutation = new SectorM<>(crossoverProbability, 1, problem.getUDN());
+
         selection = new BinaryTournamentSelection<>();
 
         algorithm = switch (alg) {
@@ -70,6 +81,8 @@ public class CSOMain {
 
         AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm).execute();
 
+        System.out.println("\n# Execution completed #\n");
+
         List<BinaryCSOSolution> population = algorithm.getResult();
 
         // To remove infeasible solutions (both objectives are 0.0)
@@ -81,17 +94,15 @@ public class CSOMain {
         });
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
-        String dir = alg + "_b";
         String name = alg + "_b_" + run;
         String FUN = name + ".FUN." + taskID + "." + jobID + ".csv";
         String VAR = name + ".VAR." + taskID + "." + jobID + ".csv";
 
         new SolutionListOutput(population).setVarFileOutputContext(new DefaultFileOutputContext(VAR, ",")).setFunFileOutputContext(new DefaultFileOutputContext(FUN, ",")).print();
 
-        System.out.println("Total execution time: " + algorithmRunner.getComputingTime() + "ms");
+        System.out.println("Total execution time: " + algorithmRunner.getComputingTime() + " ms (" + (int) (algorithmRunner.getComputingTime() / 1000) / 60 + ":" + (int) (algorithmRunner.getComputingTime() / 1000) % 60 + " minutes)");
         System.out.println("Objectives values have been written to file " + FUN);
         System.out.println("Variables values have been written to file " + VAR);
-        System.out.println("# Execution completed #");
 
 //        PlotFront plot = new Plot3D(new ArrayFront(population).getMatrix(), problem.getName() + " (NSGA-II)");
 //        plot.plot();

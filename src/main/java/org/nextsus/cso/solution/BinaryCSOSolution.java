@@ -37,6 +37,12 @@ public class BinaryCSOSolution extends DefaultBinarySolution {
         for (int i = 0; i < objectives.size(); i++) {
             objectives()[i] = objectives.get(i);
         }
+        variables().set(0, binarySet);
+    }
+
+    public BinaryCSOSolution(BinarySet binarySet) {
+        super(List.of(binarySet.size()), 2);
+        variables().set(0, binarySet);
     }
 
     public void setUEsToCellAssignment(List<Cell> assignment) {
