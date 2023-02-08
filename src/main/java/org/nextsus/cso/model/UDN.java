@@ -940,7 +940,7 @@ public abstract class UDN {
         for (List<Cell> cells : this.cells.values()) {
             for (Cell c : cells) {
                 if (c.getType() != CellType.MACRO) {
-                    c.setActivation(cso.get(bts));   //TODO revisar si esto es correcto
+                    c.setActivation(cso.get(bts));
                     bts++;
                 }
             }
@@ -1314,6 +1314,16 @@ public abstract class UDN {
                 }
             }
         }
+    }
+
+    public int getNumberOfActiveCellsByType(CellType type) {
+        int count = 0;
+        for (Double d : cells.keySet()) {
+            for (Cell c : cells.get(d)) {
+                if (c.getType() == type && c.isActive()) count++;
+            }
+        }
+        return count;
     }
 
     public String getOperatorsFile() {

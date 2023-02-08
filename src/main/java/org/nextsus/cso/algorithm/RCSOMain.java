@@ -74,12 +74,15 @@ public class RCSOMain {
 
         AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm).execute();
 
+        System.out.println("\n# Execution completed #\n");
+
         List<DoubleSolution> population = algorithm.getResult();
 
         // To remove infeasible solutions (both objectives are 0.0)
         population.removeIf(s -> s.objectives()[0] == 0.0 && s.objectives()[1] == 0.0);
 
         List<BinarySolution> binaryPopulation = toBinary(population);
+
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
         String dir = alg + "_r";
@@ -89,10 +92,9 @@ public class RCSOMain {
 
         new SolutionListOutput(binaryPopulation).setVarFileOutputContext(new DefaultFileOutputContext(VAR, ",")).setFunFileOutputContext(new DefaultFileOutputContext(FUN, ",")).print();
 
-        System.out.println("Total execution time: " + algorithmRunner.getComputingTime() + "ms");
+        System.out.println("Total execution time: " + algorithmRunner.getComputingTime() + " ms (" + (int) (algorithmRunner.getComputingTime() / 1000) / 60 + ":" + (int) (algorithmRunner.getComputingTime() / 1000) % 60 + " minutes)");
         System.out.println("Objectives values have been written to file " + FUN);
         System.out.println("Variables values have been written to file " + VAR);
-        System.out.println("# Execution completed #");
 
 //        PlotFront plot = new Plot3D(new ArrayFront(population).getMatrix(), problem.getName() + " (NSGA-II)");
 //        plot.plot();
