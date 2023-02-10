@@ -9,6 +9,7 @@ import org.nextsus.cso.algorithm.smsemoa.HybridSMSEMOA;
 import org.nextsus.cso.algorithm.sparseea.HybridSparseEA;
 import org.nextsus.cso.operator.crossover.*;
 import org.nextsus.cso.operator.mutation.BSM;
+import org.nextsus.cso.operator.mutation.BiasedBitFlipMutation;
 import org.nextsus.cso.operator.mutation.GeographicMutation;
 import org.nextsus.cso.operator.mutation.SectorM;
 import org.nextsus.cso.problem.StaticCSO;
@@ -66,7 +67,8 @@ public class CSOMain {
         crossover = new TowerX<>(crossoverProbability, 1, problem.getUDN());
 
 //        mutation = new GeographicMutation<>(crossoverProbability, 50, problem.getUDN());
-        mutation = new SectorM<>(crossoverProbability, 1, problem.getUDN());
+//        mutation = new SectorM<>(crossoverProbability, 1, problem.getUDN());
+        mutation = new BiasedBitFlipMutation(crossoverProbability, 0.7);
 
         selection = new BinaryTournamentSelection<>();
 

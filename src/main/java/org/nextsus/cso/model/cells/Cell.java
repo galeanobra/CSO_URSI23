@@ -247,7 +247,7 @@ public abstract class Cell {
     }
 
     public double getSharedBWForAssignedUsers() {
-        return this.totalBW_ / this.usersAssigned_;
+        return usersAssigned_ > 0 ? this.totalBW_ / this.usersAssigned_ : this.totalBW_;
     }
 
     @Override

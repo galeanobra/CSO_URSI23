@@ -18,12 +18,16 @@ public class BinaryCSOSolution extends DefaultBinarySolution {
     List<Cell> currentUesToCellAssignment_ = null;
     List<Cell> previousUesToCellAssignment_ = null;
 
+    protected boolean marked;
+
     public BinaryCSOSolution(List<Integer> bitsPerVariable, int numberOfObjectives) {
         super(bitsPerVariable, numberOfObjectives);
+        marked = false;
     }
 
     public BinaryCSOSolution(List<Integer> bitsPerVariable, int numberOfObjectives, int numberOfConstraints) {
         super(bitsPerVariable, numberOfObjectives, numberOfConstraints);
+        marked = false;
     }
 
     public BinaryCSOSolution(BinaryCSOSolution solution) {
@@ -38,11 +42,13 @@ public class BinaryCSOSolution extends DefaultBinarySolution {
             objectives()[i] = objectives.get(i);
         }
         variables().set(0, binarySet);
+        marked = false;
     }
 
     public BinaryCSOSolution(BinarySet binarySet) {
         super(List.of(binarySet.size()), 2);
         variables().set(0, binarySet);
+        marked = false;
     }
 
     public void setUEsToCellAssignment(List<Cell> assignment) {
@@ -61,6 +67,18 @@ public class BinaryCSOSolution extends DefaultBinarySolution {
     public void forgetUEsToCellAssignment() {
         previousUesToCellAssignment_ = null;
         currentUesToCellAssignment_ = null;
+    }
+
+    public void mark() {
+        marked = true;
+    }
+
+    public void unmark() {
+        marked = false;
+    }
+
+    public boolean isMarked() {
+        return marked;
     }
 
     @Override

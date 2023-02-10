@@ -5,14 +5,11 @@ import org.nextsus.cso.model.cells.Cell;
 import org.nextsus.cso.model.users.User;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
-import org.uma.jmetal.solution.binarysolution.BinarySolution;
-import org.uma.jmetal.solution.binarysolution.impl.DefaultBinarySolution;
 import org.uma.jmetal.util.binarySet.BinarySet;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Images {
     // Argumentos de entrada:
@@ -148,6 +145,40 @@ public class Images {
                     fwDeployment.close();
                 }
 
+                // UE capacities and assignment
+
+                cso.getUDN().resetNumberOfUsersAssignedToCells();
+
+                FileWriter fwUsers = new FileWriter("data/ia/raw/usersInfo/" + counter + ".csv");
+                PrintWriter pwUsers = new PrintWriter(fwUsers);
+                pwUsers.println("id,x,y,cell,capacity");
+                for (User u : cso.getUDN().getUsers()) {
+                    u.setServingCell(cso.getUDN().getGridPoint(u.getX(), u.getY(), u.getZ()).getCellWithHigherSNR());
+                    u.getServingCell().addUserAssigned();
+                }
+
+                for (User u : cso.getUDN().getUsers()) {
+                    double allocatedBW = u.getServingCell().getSharedBWForAssignedUsers();
+                    double c = u.capacityMIMO(cso.getUDN(), allocatedBW) / 1000.0;
+                    pwUsers.println(u.getID() + "," + u.getX() + "," + u.getY() + "," + u.getServingCell().getID() + "," + c);
+                }
+                pwUsers.close();
+                fwUsers.close();
+
+                // BS info
+                FileWriter fwCells = new FileWriter("data/ia/raw/cellsInfo/" + counter + ".csv");
+                PrintWriter pwCells = new PrintWriter(fwCells);
+                pwCells.println("id,type,x,y,z,users,total_bw,shared_bw,active");
+
+                for (Double d : cso.getUDN().getCells().keySet()) {
+                    for (Cell c : cso.getUDN().getCells().get(d)) {
+                        pwCells.println(c.getID() + "," + c.getType() + "," + c.getBTS().getX() + "," +
+                                c.getBTS().getY() + "," + c.getBTS().getZ() + "," + c.getAssignedUsers() + "," +
+                                c.getTotalBW() + "," + c.getSharedBWForAssignedUsers() + "," + c.isActive());
+                    }
+                }
+                pwCells.close();
+                fwCells.close();
 
                 // Objectives
                 fw = new FileWriter("data/IA/raw/objectives/" + counter + ".csv");
