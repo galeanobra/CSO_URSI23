@@ -1358,6 +1358,14 @@ public abstract class UDN {
         return towers;
     }
 
+    public int getNumberOfTowers() {
+        return towerList.size();
+    }
+
+    public int getNumberOfSectors() {
+        return sectorList.size();
+    }
+
     /**
      * Cells
      */
