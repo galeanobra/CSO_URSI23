@@ -1366,7 +1366,7 @@ public abstract class UDN {
         return sectorList.size();
     }
 
-    public int getNumberOfBs() {
+    public int getNumberOfBS() {
         return btsList.size();
     }
 
