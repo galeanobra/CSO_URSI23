@@ -1366,6 +1366,10 @@ public abstract class UDN {
         return sectorList.size();
     }
 
+    public int getNumberOfBs() {
+        return btsList.size();
+    }
+
     /**
      * Cells
      */
