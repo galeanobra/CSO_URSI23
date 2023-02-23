@@ -1,5 +1,8 @@
 package org.nextsus.cso.ela;
 
+import org.nextsus.cso.ela.local.sampling.Walk;
+import org.nextsus.cso.ela.local.sampling.impl.AdaptiveWalk;
+import org.nextsus.cso.ela.local.sampling.impl.RandomWalk;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.algorithm.Algorithm;
@@ -20,7 +23,7 @@ public class ELAMain {
         SelectionOperator<List<BinaryCSOSolution>, BinaryCSOSolution> selection;
 
 
-        int maxEvals = Integer.parseInt(args[0]);   // Stopping condition
+        int walkLength = Integer.parseInt(args[0]); // Stopping condition
         int run = Integer.parseInt(args[1]);        // Seed selection
         int taskID = Integer.parseInt(args[2]);     // Task ID (for filename)
         int jobID = Integer.parseInt(args[3]);      // Job ID (for filename)
@@ -32,14 +35,19 @@ public class ELAMain {
 
         double mutationProbability = 10.0 / problem.getTotalNumberOfActivableCells();
 
-        PLS pls = new PLS(problem, maxEvals, mutationProbability, problem.getTotalNumberOfActivableCells());
+        Walk walk = switch (alg) {
+            case "adaptive" -> new AdaptiveWalk(problem, walkLength, problem.getTotalNumberOfActivableCells());
+            default -> new RandomWalk(problem, walkLength, problem.getTotalNumberOfActivableCells());
+        };
 
-        List<BinaryCSOSolution> population = pls.execute();
+//        PLS pls = new PLS(problem, maxEvals, mutationProbability, problem.getTotalNumberOfActivableCells());
+
+        List<BinaryCSOSolution> population = walk.execute();
 
         System.out.println("\n# Execution completed #\n");
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
-        String name = alg + "_b_" + run;
+        String name = alg + "_" + run;
         String FUN = name + ".FUN." + taskID + "." + jobID + ".csv";
         String VAR = name + ".VAR." + taskID + "." + jobID + ".csv";
 

@@ -129,6 +129,7 @@ public class PLS {
         else {
             archive.solutions().remove(s);
             s.mark();
+            problem.evaluate(s);
             archive.add(s);
             return s;
         }
