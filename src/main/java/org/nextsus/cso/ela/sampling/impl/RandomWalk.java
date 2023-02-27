@@ -1,11 +1,12 @@
-package org.nextsus.cso.ela.local.sampling.impl;
+package org.nextsus.cso.ela.sampling.impl;
 
-import org.nextsus.cso.ela.local.sampling.Walk;
+import org.nextsus.cso.ela.sampling.Walk;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.selection.impl.RandomSelection;
 import org.uma.jmetal.problem.Problem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RandomWalk extends Walk {
@@ -25,15 +26,18 @@ public class RandomWalk extends Walk {
         problem.evaluate(current);
         walk.add(current);
 
+        System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
+
+
         // Random walk
         while (steps < walkLength) {
             // Get a random neighbor
-            current = selectionOperator.execute(computeNeighborhood(current));
+            current = selectionOperator.execute(getNeighborhood(current));
             problem.evaluate(current);
             walk.add(current);
             steps++;
 
-            System.out.println("Steps = " + steps + "\n");
+            System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
         }
 
         return walk;

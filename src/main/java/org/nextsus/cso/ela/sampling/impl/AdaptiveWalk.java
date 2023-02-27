@@ -1,6 +1,6 @@
-package org.nextsus.cso.ela.local.sampling.impl;
+package org.nextsus.cso.ela.sampling.impl;
 
-import org.nextsus.cso.ela.local.sampling.Walk;
+import org.nextsus.cso.ela.sampling.Walk;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.selection.impl.RandomSelection;
 import org.uma.jmetal.problem.Problem;
@@ -59,7 +59,7 @@ public class AdaptiveWalk extends Walk {
     }
 
     private BinaryCSOSolution getImprovedNeighbor(BinaryCSOSolution solution) {
-        List<BinaryCSOSolution> neighborhood = computeNeighborhood(solution);
+        List<BinaryCSOSolution> neighborhood = getNeighborhood(solution);
         List<Integer> permutation = createIntegerPermutation(neighborhood.size());
 
         DominanceComparator<BinaryCSOSolution> comparator = new DefaultDominanceComparator<>();

@@ -1,8 +1,9 @@
 package org.nextsus.cso.ela;
 
-import org.nextsus.cso.ela.local.sampling.Walk;
-import org.nextsus.cso.ela.local.sampling.impl.AdaptiveWalk;
-import org.nextsus.cso.ela.local.sampling.impl.RandomWalk;
+import org.nextsus.cso.ela.features.LocalFeatures;
+import org.nextsus.cso.ela.sampling.Walk;
+import org.nextsus.cso.ela.sampling.impl.AdaptiveWalk;
+import org.nextsus.cso.ela.sampling.impl.RandomWalk;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.algorithm.Algorithm;
@@ -37,6 +38,7 @@ public class ELAMain {
 
         Walk walk = switch (alg) {
             case "adaptive" -> new AdaptiveWalk(problem, walkLength, problem.getTotalNumberOfActivableCells());
+//            case "PLS" -> new PLS(problem, walkLength, mutationProbability, problem.getTotalNumberOfActivableCells());
             default -> new RandomWalk(problem, walkLength, problem.getTotalNumberOfActivableCells());
         };
 
@@ -55,5 +57,7 @@ public class ELAMain {
 
         System.out.println("Objectives values have been written to file " + FUN);
         System.out.println("Variables values have been written to file " + VAR);
+
+        new LocalFeatures(problem, population, walk.getClass()).execute();
     }
 }

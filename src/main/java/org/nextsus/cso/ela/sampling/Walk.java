@@ -1,4 +1,4 @@
-package org.nextsus.cso.ela.local.sampling;
+package org.nextsus.cso.ela.sampling;
 
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.selection.SelectionOperator;
@@ -18,7 +18,7 @@ public abstract class Walk {
 
     public abstract List<BinaryCSOSolution> execute();
 
-    protected List<BinaryCSOSolution> computeNeighborhood(BinaryCSOSolution solution) {
+    protected List<BinaryCSOSolution> getNeighborhood(BinaryCSOSolution solution) {
         List<BinaryCSOSolution> neighbors = new ArrayList<>();
 
         for (int i = 0; i < solution.getNumberOfBits(0); i++) {

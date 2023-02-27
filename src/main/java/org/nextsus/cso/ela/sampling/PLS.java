@@ -1,4 +1,4 @@
-package org.nextsus.cso.ela;
+package org.nextsus.cso.ela.sampling;
 
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.mutation.MutationOperator;

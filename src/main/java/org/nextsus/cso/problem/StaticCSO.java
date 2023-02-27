@@ -31,24 +31,24 @@ public class StaticCSO extends CSO {
 
         loadOperatorsConfig(udn_.getOperatorsFile());
 
-        System.out.println("\n# Execution started #");
+        System.out.println("\n# Execution started #\n");
 
 //        udn_.getCellsOfInterestByPoint();
     }
 
     @Override
     public int numberOfVariables() {
-        return 1 ;
+        return 1;
     }
 
     @Override
     public int numberOfObjectives() {
-        return 2 ;
+        return 2;
     }
 
     @Override
     public int numberOfConstraints() {
-        return 0 ;
+        return 0;
     }
 
     @Override
