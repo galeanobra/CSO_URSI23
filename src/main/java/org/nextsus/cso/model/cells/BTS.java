@@ -12,8 +12,7 @@ import us.hebi.matlab.mat.types.Matrix;
 import us.hebi.matlab.mat.types.Source;
 import us.hebi.matlab.mat.types.Sources;
 
-import java.io.*;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -24,8 +23,8 @@ import java.util.Objects;
 public class BTS {
 
     protected static int uniqueId_ = 0;
-    Matrix antennaArray_;
     static boolean patternFileLoaded_ = false;
+    Matrix antennaArray_;
     int id_;
 
     // BTS location
@@ -104,6 +103,16 @@ public class BTS {
                 if (cell.active_) {
                     num++;
                 }
+            }
+        }
+        return num;
+    }
+
+    public int getNumberOfInstalledCells() {
+        int num = 0;
+        for (Sector sector : this.sectors_) {
+            for (Cell cell : sector.cells_) {
+                num++;
             }
         }
         return num;

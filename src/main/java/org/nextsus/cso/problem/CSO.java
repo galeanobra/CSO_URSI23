@@ -144,6 +144,31 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
         return capacity;
     }
 
+    double networkCapacityUpperLimit() {
+
+        BinarySet binarySet = new BinarySet(getTotalNumberOfActivableCells());
+        for (int i = 0; i < binarySet.getBinarySetLength(); i++)
+            binarySet.set(i, true);
+
+        udn_.setCellActivation(binarySet);
+        udn_.resetNumberOfUsersAssignedToCells();
+
+        for (User u : this.udn_.getUsers()) {
+            u.setServingCell(udn_.getGridPoint(u.getX(), u.getY(), u.getZ()).getCellWithHigherSNR());
+            u.getServingCell().setNumbersOfUsersAssigned(1);
+        }
+
+        double capacity = 0.0;
+
+        for (User u : this.udn_.getUsers()) {
+            double allocatedBW = u.getServingCell().getSharedBWForAssignedUsers();
+            double c = u.capacityMIMO(this.udn_, allocatedBW);
+            capacity += c / 1000.0;
+        }
+
+        return capacity;
+    }
+
     public int getRun() {
         return this.run_;
     }

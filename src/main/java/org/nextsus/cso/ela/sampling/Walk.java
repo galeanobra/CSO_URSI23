@@ -1,10 +1,10 @@
 package org.nextsus.cso.ela.sampling;
 
+import org.nextsus.cso.ela.neighborhood.Neighborhood;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.selection.SelectionOperator;
 import org.uma.jmetal.problem.Problem;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Walk {
@@ -16,19 +16,7 @@ public abstract class Walk {
     protected SelectionOperator<List<BinaryCSOSolution>, BinaryCSOSolution> selectionOperator;
     protected List<BinaryCSOSolution> walk;
 
+    protected Neighborhood n;
+
     public abstract List<BinaryCSOSolution> execute();
-
-    protected List<BinaryCSOSolution> getNeighborhood(BinaryCSOSolution solution) {
-        List<BinaryCSOSolution> neighbors = new ArrayList<>();
-
-        for (int i = 0; i < solution.getNumberOfBits(0); i++) {
-            // Generate the new neighbor setting the Hamming distance to 1
-            BinaryCSOSolution s = solution.copy();
-            s.variables().get(0).flip(i);
-            problem.evaluate(s);
-            neighbors.add(s);
-        }
-
-        return neighbors;
-    }
 }

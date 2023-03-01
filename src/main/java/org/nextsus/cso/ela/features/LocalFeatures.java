@@ -1,8 +1,12 @@
 package org.nextsus.cso.ela.features;
 
+import org.nextsus.cso.ela.neighborhood.Neighborhood;
+import org.nextsus.cso.ela.neighborhood.impl.*;
 import org.nextsus.cso.ela.sampling.Walk;
+import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.problem.Problem;
+import org.uma.jmetal.qualityindicator.impl.hypervolume.impl.PISAHypervolume;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.dominanceComparator.DominanceComparator;
 import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
@@ -15,12 +19,20 @@ public class LocalFeatures {
     protected List<BinaryCSOSolution> solutionSet;
     protected DominanceComparator<BinaryCSOSolution> dominanceComparator;
     protected Class<? extends Walk> walk;
+    protected Neighborhood n;
 
-    public LocalFeatures(Problem<BinaryCSOSolution> problem, List<BinaryCSOSolution> solutionSet, Class<? extends Walk> walk) {
+    public LocalFeatures(Problem<BinaryCSOSolution> problem, List<BinaryCSOSolution> solutionSet, Class<? extends Walk> walk, Neighborhood.NeighborhoodType neighborhoodType) {
         this.problem = problem;
         this.solutionSet = solutionSet;
         this.dominanceComparator = new DefaultDominanceComparator<>();
         this.walk = walk;
+        this.n = switch (neighborhoodType) {
+            case Tower -> new TowerNeighborhood(problem);
+            case BS -> new BSNeighborhood(problem);
+            case Sector -> new SectorNeighborhood(problem);
+            case Cell -> new CellNeighborhood(problem);
+            case Hamming -> new HammingNeighborhood(problem);
+        };
     }
 
     public void execute() {
@@ -48,59 +60,80 @@ public class LocalFeatures {
 
         System.out.println("\n# Computing local landscape features #\n");
 
-        if (walk.getSimpleName().equals("RandomWalk")) {
-            List<Double> inf_avg_rws_list = new ArrayList<>();
-            List<Double> sup_avg_rws_list = new ArrayList<>();
-            List<Double> inc_avg_rws_list = new ArrayList<>();
-            List<Double> lnd_avg_rws_list = new ArrayList<>();
-            List<Double> lsupp_avg_rws_list = new ArrayList<>();
-            List<Double> hv_avg_rws_list = new ArrayList<>();
-            List<Double> hvd_avg_rws_list = new ArrayList<>();
-            List<Double> nhv_avg_rws_list = new ArrayList<>();
+        double x = 0.0;
+        double y = ((StaticCSO) problem).getCapacityUpperLimit();
+        PISAHypervolume hv = new PISAHypervolume(new double[]{x, y});
 
-            for (BinaryCSOSolution solution : solutionSet) {
-                List<BinaryCSOSolution> neighborhod = getNeighborhood(solution);
+        List<Double> inf_avg_list = new ArrayList<>();
+        List<Double> sup_avg_list = new ArrayList<>();
+        List<Double> inc_avg_list = new ArrayList<>();
+        List<Double> lnd_avg_list = new ArrayList<>();
+        List<Double> lsupp_avg_list = new ArrayList<>();
+        List<Double> hv_avg_list = new ArrayList<>();
+        List<Double> hvd_avg_list = new ArrayList<>();
+        List<Double> nhv_avg_list = new ArrayList<>();
 
-                // To obtain the PS
-                NonDominatedSolutionListArchive<BinaryCSOSolution> nonDominatedSolutionArchive = new NonDominatedSolutionListArchive<>();
-                nonDominatedSolutionArchive.addAll(neighborhod);
+        for (BinaryCSOSolution solution : solutionSet) {
+//            List<BinaryCSOSolution> neighborhood = getHammingNeighborhood(solution);
+            List<BinaryCSOSolution> neighborhood = n.getNeighborhood(solution);
 
-                lnd_avg_rws_list.add((double) nonDominatedSolutionArchive.size());
-                lsupp_avg_rws_list.add(getSupportedSolutions(nonDominatedSolutionArchive.solutions()));
-                hv_avg_rws_list.add(0.0);
-                hvd_avg_rws_list.add(0.0);
-                nhv_avg_rws_list.add(0.0);
+            // To obtain the PS
+            NonDominatedSolutionListArchive<BinaryCSOSolution> nonDominatedSolutionArchive = new NonDominatedSolutionListArchive<>();
+            nonDominatedSolutionArchive.addAll(neighborhood);
 
-                double sup = 0.0;
-                double inf = 0.0;
-                double inc = 0.0;
+            lnd_avg_list.add((double) nonDominatedSolutionArchive.size());
+            lsupp_avg_list.add(getSupportedSolutions(nonDominatedSolutionArchive.solutions()));
 
-                for (BinaryCSOSolution neighbor : neighborhod) {
-                    switch (dominanceComparator.compare(neighbor, solution)) {
-                        case -1 -> sup++;
-                        case 1 -> inf++;
-                        default -> inc++;
-                    }
+            double[][] frontSolution = solutionListToDoubleMatrix(List.of(solution));
+            double solutionHV = hv.compute(frontSolution);
 
-                    // TODO habría que definir un punto de referencia
-                    // Calcular HV promedio de cada vecino
-                    // Diferencia entre el HV del vecino y la solución actual
-                    // HV cubierto por el vecindario completo TODO ?¿
+            List<Double> hv_list = new ArrayList<>();
+            List<Double> hvd_list = new ArrayList<>();
+
+            double sup = 0.0;
+            double inf = 0.0;
+            double inc = 0.0;
+
+            for (BinaryCSOSolution neighbor : neighborhood) {
+                switch (dominanceComparator.compare(neighbor, solution)) {
+                    case -1 -> sup++;
+                    case 1 -> inf++;
+                    default -> inc++;
                 }
-                inf_avg_rws_list.add(inf);
-                sup_avg_rws_list.add(sup);
-                inc_avg_rws_list.add(inc);
+
+                double[][] frontNeighbor = solutionListToDoubleMatrix(List.of(neighbor));
+                hv_list.add(hv.compute(frontNeighbor));
+                hvd_list.add(Math.abs(solutionHV - hv_list.get(hv_list.size() - 1)));
             }
+            inf_avg_list.add(inf);
+            sup_avg_list.add(sup);
+            inc_avg_list.add(inc);
 
-            int inf_avg_aws = (int) inf_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            int sup_avg_aws = (int) sup_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            int inc_avg_aws = (int) inc_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            int lnd_avg_aws = (int) lnd_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            int lsupp_avg_aws = (int) lsupp_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            double hv_avg_aws = hv_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            double hvd_avg_aws = hvd_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            double nhv_awd_aws = nhv_avg_rws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+            hv_avg_list.add(hv_list.stream().mapToDouble(i -> i).sum() / neighborhood.size());   // Promedio HV de los vecinos
+            hvd_avg_list.add(hvd_list.stream().mapToDouble(i -> i).sum() / neighborhood.size()); // Diferencia promedio entre el HV de los vecinos y el de la solución actual
+            nhv_avg_list.add(hv.compute(solutionListToDoubleMatrix(neighborhood)));              // HV del vecindario completo
+        }
 
+        int inf_avg = (int) inf_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        int sup_avg = (int) sup_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        int inc_avg = (int) inc_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        int lnd_avg = (int) lnd_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        int lsupp_avg = (int) lsupp_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double hv_avg = hv_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double hvd_avg = hvd_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double nhv_avg = nhv_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+
+        // Print common features between random and adaptive walk
+        System.out.println("#inf_avg = " + inf_avg);
+        System.out.println("#sup_avg = " + sup_avg);
+        System.out.println("#inc_avg = " + inc_avg);
+        System.out.println("#lnd_avg = " + lnd_avg);
+        System.out.println("#lsupp_avg = " + lsupp_avg);
+        System.out.println("hv_avg = " + hv_avg);
+        System.out.println("hvd_avg = " + hvd_avg);
+        System.out.println("nhv_avg = " + nhv_avg);
+
+        if (walk.getSimpleName().equals("RandomWalk")) {
             // f_cor_rws
             double mean_x = 0.0;
             double mean_y = 0.0;
@@ -129,128 +162,48 @@ public class LocalFeatures {
             double f_cor_rws = cov_xy / (std_x * std_y);
 
             // First auto-correlation coefficients
-            List<Double> inf_r1_rws_list = inf_avg_rws_list;
-            List<Double> sup_r1_rws_list = sup_avg_rws_list;
-            List<Double> inc_r1_rws_list = inc_avg_rws_list;
-            List<Double> lnd_r1_rws_list = lnd_avg_rws_list;
-            List<Double> lsupp_r1_rws_list = lsupp_avg_rws_list;
-            List<Double> hv_r1_rws_list = hv_avg_rws_list;
-            List<Double> hvd_r1_rws_list = hvd_avg_rws_list;
-            List<Double> nhv_r1_rws_list = nhv_avg_rws_list;
-
+            List<Double> inf_r1_rws_list = inf_avg_list;
             inf_r1_rws_list.remove(0);
+            double inf_r1_rws = computeCorrelation(inf_avg_list, inf_r1_rws_list);
+
+            List<Double> sup_r1_rws_list = sup_avg_list;
             sup_r1_rws_list.remove(0);
+            double sup_r1_rws = computeCorrelation(sup_avg_list, sup_r1_rws_list);
+
+            List<Double> inc_r1_rws_list = inc_avg_list;
             inc_r1_rws_list.remove(0);
+            double inc_r1_rws = computeCorrelation(inc_avg_list, inc_r1_rws_list);
+
+            List<Double> lnd_r1_rws_list = lnd_avg_list;
             lnd_r1_rws_list.remove(0);
+            double lnd_r1_rws = computeCorrelation(lnd_avg_list, lnd_r1_rws_list);
+
+            List<Double> lsupp_r1_rws_list = lsupp_avg_list;
             lsupp_r1_rws_list.remove(0);
+            double lsupp_r1_rws = computeCorrelation(lsupp_avg_list, lsupp_r1_rws_list);
+
+            List<Double> hv_r1_rws_list = hv_avg_list;
             hv_r1_rws_list.remove(0);
+            double hv_r1_rws = computeCorrelation(hv_avg_list, hv_r1_rws_list);
+
+            List<Double> hvd_r1_rws_list = hvd_avg_list;
             hvd_r1_rws_list.remove(0);
+            double hvd_r1_rws = computeCorrelation(hvd_avg_list, hvd_r1_rws_list);
+
+            List<Double> nhv_r1_rws_list = nhv_avg_list;
             nhv_r1_rws_list.remove(0);
+            double nhv_r1_rws = computeCorrelation(nhv_avg_list, nhv_r1_rws_list);
 
-            double inf_r1_aws = computeCorrelation(inf_avg_rws_list, inf_r1_rws_list);
-            double sup_r1_aws = computeCorrelation(sup_avg_rws_list, sup_r1_rws_list);
-            double inc_r1_aws = computeCorrelation(inc_avg_rws_list, inc_r1_rws_list);
-            double lnd_r1_aws = computeCorrelation(lnd_avg_rws_list, lnd_r1_rws_list);
-            double lsupp_r1_aws = computeCorrelation(lsupp_avg_rws_list, lsupp_r1_rws_list);
-            double hv_r1_aws = computeCorrelation(hv_avg_rws_list, hv_r1_rws_list);
-            double hvd_r1_aws = computeCorrelation(hvd_avg_rws_list, hvd_r1_rws_list);
-            double nhv_r1_aws = computeCorrelation(nhv_avg_rws_list, nhv_r1_rws_list);
-
-            // Print features
-            System.out.println("#inf_avg_rws = " + inf_avg_aws);
-            System.out.println("#inf_r1_rws = " + inf_r1_aws);
-            System.out.println("#sup_avg_rws = " + sup_avg_aws);
-            System.out.println("#sup_r1_rws = " + sup_r1_aws);
-            System.out.println("#inc_avg_rws = " + inc_avg_aws);
-            System.out.println("#inc_r1_rws = " + inc_r1_aws);
-            System.out.println("#lnd_avg_rws = " + lnd_avg_aws);
-            System.out.println("#lnd_r1_rws = " + lnd_r1_aws);
-            System.out.println("#lsupp_avg_rws = " + lsupp_avg_aws);
-            System.out.println("#lsupp_r1_rws = " + lsupp_r1_aws);
-            System.out.println("hv_avg_rws = " + hv_avg_aws);
-            System.out.println("hv_r1_rws = " + hv_r1_aws);
-            System.out.println("hvd_avg_rws = " + hvd_avg_aws);
-            System.out.println("hvd_r1_rws = " + hvd_r1_aws);
-            System.out.println("nhv_awd_rws = " + nhv_awd_aws);
-            System.out.println("nhv_r1_rws = " + nhv_r1_aws);
-            System.out.println("f_cor_rws = " + f_cor_rws);
-        } else if (walk.getSimpleName().equals("AdaptiveWalk")) {
-            int length_aws = solutionSet.size() - 1;
-            List<Integer> inf_avg_aws_list = new ArrayList<>();
-            List<Integer> sup_avg_aws_list = new ArrayList<>();
-            List<Integer> inc_avg_aws_list = new ArrayList<>();
-            List<Integer> lnd_avg_aws_list = new ArrayList<>();
-            List<Integer> lsupp_avg_aws_list = new ArrayList<>();
-            List<Double> hv_avg_aws_list = new ArrayList<>();
-            List<Double> hvd_avg_aws_list = new ArrayList<>();
-            List<Double> nhv_awd_aws_list = new ArrayList<>();
-
-            for (BinaryCSOSolution solution : solutionSet) {
-                List<BinaryCSOSolution> neighborhod = getNeighborhood(solution);
-
-                // To obtain the PS
-                NonDominatedSolutionListArchive<BinaryCSOSolution> nonDominatedSolutionArchive = new NonDominatedSolutionListArchive<>();
-                nonDominatedSolutionArchive.addAll(neighborhod);
-
-                lnd_avg_aws_list.add(nonDominatedSolutionArchive.size());
-                lsupp_avg_aws_list.add(0); //TODO
-                hv_avg_aws_list.add(0.0);
-                hvd_avg_aws_list.add(0.0);
-                nhv_awd_aws_list.add(0.0);
-
-                int sup = 0;
-                int inf = 0;
-                int inc = 0;
-
-                for (BinaryCSOSolution neighbor : neighborhod) {
-                    switch (dominanceComparator.compare(neighbor, solution)) {
-                        case -1 -> sup++;
-                        case 1 -> inf++;
-                        default -> inc++;
-                    }
-                    // TODO habría que definir un punto de referencia
-                    // Calcular HV promedio de cada vecino
-                    // Diferencia entre el HV del vecino y la solución actual
-                    // HV cubierto por el vecindario completo TODO ?¿
-                }
-                inf_avg_aws_list.add(inf);
-                sup_avg_aws_list.add(sup);
-                inc_avg_aws_list.add(inc);
-            }
-
-            int inf_avg_aws = inf_avg_aws_list.stream().mapToInt(i -> i).sum() / solutionSet.size();
-            int sup_avg_aws = sup_avg_aws_list.stream().mapToInt(i -> i).sum() / solutionSet.size();
-            int inc_avg_aws = inc_avg_aws_list.stream().mapToInt(i -> i).sum() / solutionSet.size();
-            int lnd_avg_aws = lnd_avg_aws_list.stream().mapToInt(i -> i).sum() / solutionSet.size();
-            int lsupp_avg_aws = lsupp_avg_aws_list.stream().mapToInt(i -> i).sum() / solutionSet.size();
-            double hv_avg_aws = hv_avg_aws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            double hvd_avg_aws = hvd_avg_aws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-            double nhv_awd_aws = nhv_awd_aws_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-
-            // Print features
-            System.out.println("#inf_avg_aws = " + inf_avg_aws);
-            System.out.println("#sup_avg_aws = " + sup_avg_aws);
-            System.out.println("#inc_avg_aws = " + inc_avg_aws);
-            System.out.println("#lnd_avg_aws = " + lnd_avg_aws);
-            System.out.println("#lsupp_avg_aws = " + lsupp_avg_aws);
-            System.out.println("hv_avg_aws = " + hv_avg_aws);
-            System.out.println("hvd_avg_aws = " + hvd_avg_aws);
-            System.out.println("nhv_awd_aws = " + nhv_awd_aws);
-            System.out.println("length_aws = " + length_aws);
+            System.out.println("#inf_r1 = " + inf_r1_rws);
+            System.out.println("#sup_r1 = " + sup_r1_rws);
+            System.out.println("#inc_r1 = " + inc_r1_rws);
+            System.out.println("#lnd_r1 = " + lnd_r1_rws);
+            System.out.println("#lsupp_r1 = " + lsupp_r1_rws);
+            System.out.println("hv_r1 = " + hv_r1_rws);
+            System.out.println("hvd_r1 = " + hvd_r1_rws);
+            System.out.println("nhv_r1 = " + nhv_r1_rws);
+            System.out.println("f_cor = " + f_cor_rws);
         }
-    }
-
-    protected List<BinaryCSOSolution> getNeighborhood(BinaryCSOSolution solution) {
-        List<BinaryCSOSolution> neighbors = new ArrayList<>();
-
-        for (int i = 0; i < solution.getNumberOfBits(0); i++) {
-            BinaryCSOSolution s = solution.copy();
-            s.variables().get(0).flip(i);
-            problem.evaluate(s);
-            neighbors.add(s);
-        }
-
-        return neighbors;
     }
 
     protected double computeCorrelation(List<Double> x, List<Double> y) {
@@ -299,5 +252,16 @@ public class LocalFeatures {
             }
         }
         return supp;
+    }
+
+    protected double[][] solutionListToDoubleMatrix(List<BinaryCSOSolution> solutionList) {
+        double[][] front = new double[solutionList.size()][2];
+
+        for (int i = 0; i < solutionList.size(); i++) {
+            front[i][0] = solutionList.get(i).objectives()[0];
+            front[i][1] = solutionList.get(i).objectives()[1];
+        }
+
+        return front;
     }
 }

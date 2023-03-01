@@ -1,5 +1,7 @@
 package org.nextsus.cso.ela.sampling.impl;
 
+import org.nextsus.cso.ela.neighborhood.Neighborhood;
+import org.nextsus.cso.ela.neighborhood.impl.*;
 import org.nextsus.cso.ela.sampling.Walk;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.operator.selection.impl.RandomSelection;
@@ -19,7 +21,7 @@ public class AdaptiveWalk extends Walk {
     protected int maxWalkLength;
     protected boolean plo;
 
-    public AdaptiveWalk(Problem<BinaryCSOSolution> problem, int maxWalkLength, int numberOfBits) {
+    public AdaptiveWalk(Problem<BinaryCSOSolution> problem, int maxWalkLength, int numberOfBits, Neighborhood.NeighborhoodType neighborhoodType) {
         this.problem = problem;
         steps = 0;
         this.maxWalkLength = maxWalkLength;
@@ -27,6 +29,13 @@ public class AdaptiveWalk extends Walk {
         this.numberOfBits = numberOfBits;
         walk = new ArrayList<>();
         plo = false;
+        n = switch (neighborhoodType) {
+            case Tower -> new TowerNeighborhood(problem);
+            case BS -> new BSNeighborhood(problem);
+            case Sector -> new SectorNeighborhood(problem);
+            case Cell -> new CellNeighborhood(problem);
+            case Hamming -> new HammingNeighborhood(problem);
+        };
     }
 
     @Override
@@ -59,7 +68,7 @@ public class AdaptiveWalk extends Walk {
     }
 
     private BinaryCSOSolution getImprovedNeighbor(BinaryCSOSolution solution) {
-        List<BinaryCSOSolution> neighborhood = getNeighborhood(solution);
+        List<BinaryCSOSolution> neighborhood = n.getNeighborhood(solution);
         List<Integer> permutation = createIntegerPermutation(neighborhood.size());
 
         DominanceComparator<BinaryCSOSolution> comparator = new DefaultDominanceComparator<>();

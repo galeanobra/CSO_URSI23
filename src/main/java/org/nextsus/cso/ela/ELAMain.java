@@ -1,6 +1,7 @@
 package org.nextsus.cso.ela;
 
 import org.nextsus.cso.ela.features.LocalFeatures;
+import org.nextsus.cso.ela.neighborhood.Neighborhood;
 import org.nextsus.cso.ela.sampling.Walk;
 import org.nextsus.cso.ela.sampling.impl.AdaptiveWalk;
 import org.nextsus.cso.ela.sampling.impl.RandomWalk;
@@ -23,7 +24,6 @@ public class ELAMain {
         MutationOperator<BinaryCSOSolution> mutation;
         SelectionOperator<List<BinaryCSOSolution>, BinaryCSOSolution> selection;
 
-
         int walkLength = Integer.parseInt(args[0]); // Stopping condition
         int run = Integer.parseInt(args[1]);        // Seed selection
         int taskID = Integer.parseInt(args[2]);     // Task ID (for filename)
@@ -32,14 +32,16 @@ public class ELAMain {
         String scenario = args[4];                  // Scenario type
         String alg = args[5];                       // Algorithm
 
+        Neighborhood.NeighborhoodType neighborhoodType = Neighborhood.NeighborhoodType.Cell;
+
         problem = new StaticCSO(main, scenario, run);
 
         double mutationProbability = 10.0 / problem.getTotalNumberOfActivableCells();
 
         Walk walk = switch (alg) {
-            case "adaptive" -> new AdaptiveWalk(problem, walkLength, problem.getTotalNumberOfActivableCells());
+            case "adaptive" -> new AdaptiveWalk(problem, walkLength, problem.getTotalNumberOfActivableCells(), neighborhoodType);
 //            case "PLS" -> new PLS(problem, walkLength, mutationProbability, problem.getTotalNumberOfActivableCells());
-            default -> new RandomWalk(problem, walkLength, problem.getTotalNumberOfActivableCells());
+            default -> new RandomWalk(problem, walkLength, problem.getTotalNumberOfActivableCells(), neighborhoodType);
         };
 
 //        PLS pls = new PLS(problem, maxEvals, mutationProbability, problem.getTotalNumberOfActivableCells());
@@ -58,6 +60,6 @@ public class ELAMain {
         System.out.println("Objectives values have been written to file " + FUN);
         System.out.println("Variables values have been written to file " + VAR);
 
-        new LocalFeatures(problem, population, walk.getClass()).execute();
+        new LocalFeatures(problem, population, walk.getClass(), neighborhoodType).execute();
     }
 }

@@ -88,6 +88,10 @@ public class StaticCSO extends CSO {
         return solution;
     } // evaluate
 
+    public double getCapacityUpperLimit() {
+        return networkCapacityUpperLimit();
+    }
+
     /**
      * m
      * In this function operators are applied in order to improve the sinr of
