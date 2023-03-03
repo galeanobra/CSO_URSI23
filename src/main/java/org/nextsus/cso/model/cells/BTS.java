@@ -118,6 +118,10 @@ public class BTS {
         return num;
     }
 
+    public List<Sector> getActiveSectors() {
+        return sectors_.stream().filter(s -> s.getActiveCells() > 0).toList();
+    }
+
     public int getId() {
         return id_;
     }

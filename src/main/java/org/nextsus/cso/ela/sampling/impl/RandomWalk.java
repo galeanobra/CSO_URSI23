@@ -15,6 +15,7 @@ public class RandomWalk extends Walk {
     public RandomWalk(Problem<BinaryCSOSolution> problem, int walkLength, int numberOfBits, Neighborhood.NeighborhoodType neighborhoodType) {
         this.problem = problem;
         steps = 0;
+        evaluations = 0;
         this.walkLength = walkLength;
         selectionOperator = new RandomSelection<>();
         this.numberOfBits = numberOfBits;
@@ -33,16 +34,17 @@ public class RandomWalk extends Walk {
         // Create and evaluate a solution
         BinaryCSOSolution current = new BinaryCSOSolution(List.of(numberOfBits), problem.numberOfObjectives());
         problem.evaluate(current);
+        evaluations++;
         walk.add(current);
 
         System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
-
 
         // Random walk
         while (steps < walkLength) {
             // Get a random neighbor
             current = selectionOperator.execute(n.getNeighborhood(current));
             problem.evaluate(current);
+            evaluations++;
             walk.add(current);
             steps++;
 

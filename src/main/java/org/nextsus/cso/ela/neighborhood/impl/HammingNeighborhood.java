@@ -19,7 +19,6 @@ public class HammingNeighborhood extends Neighborhood {
         for (int i = 0; i < solution.getNumberOfBits(0); i++) {
             BinaryCSOSolution neighbor = solution.copy();
             neighbor.variables().get(0).flip(i);
-            problem.evaluate(neighbor);
             neighbors.add(neighbor);
         }
 

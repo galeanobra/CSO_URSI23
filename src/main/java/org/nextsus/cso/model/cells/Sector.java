@@ -71,6 +71,10 @@ public class Sector {
         this.coverageRadius_ = sector.coverageRadius_;
     }
 
+    public int getActiveCells() {
+        return cells_.stream().filter(Cell::isActive).toList().size();
+    }
+
     public int getX() {
         return x_;
     }

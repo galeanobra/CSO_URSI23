@@ -5,6 +5,7 @@ import org.nextsus.cso.model.UDN;
 import org.nextsus.cso.model.cells.BTS;
 import org.nextsus.cso.model.cells.Cell;
 import org.nextsus.cso.model.cells.Sector;
+import org.nextsus.cso.model.users.User;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.util.binarySet.BinarySet;
 
@@ -81,7 +82,7 @@ public class StaticCSO extends CSO {
             solution.objectives()[0] = powerConsumption;
             solution.objectives()[1] = -capacity;
         } else {
-            solution.objectives()[0] = 0.0;
+            solution.objectives()[0] = Double.MAX_VALUE;    // TODO
             solution.objectives()[1] = 0.0;
         }
 
@@ -90,6 +91,10 @@ public class StaticCSO extends CSO {
 
     public double getCapacityUpperLimit() {
         return networkCapacityUpperLimit();
+    }
+
+    public double getConsumptionUpperLimit() {
+        return powerConsumptionUpperLimit();
     }
 
     /**
@@ -144,6 +149,23 @@ public class StaticCSO extends CSO {
 
         return sum;
     }// powerConsumptionStatic
+
+    double powerConsumptionUpperLimit() {
+
+        BinarySet binarySet = new BinarySet(getTotalNumberOfActivableCells());
+        for (int i = 0; i < binarySet.getBinarySetLength(); i++)
+            binarySet.set(i, true);
+
+        udn_.setCellActivation(binarySet);
+        udn_.resetNumberOfUsersAssignedToCells();
+
+        for (User u : this.udn_.getUsers()) {
+            u.setServingCell(udn_.getGridPoint(u.getX(), u.getY(), u.getZ()).getCellWithHigherSNR());
+            u.getServingCell().setNumbersOfUsersAssigned(1);
+        }
+
+        return powerConsumptionStatic();
+    }
 
     public UDN getUDN() {
         return udn_;

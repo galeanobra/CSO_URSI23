@@ -3,16 +3,20 @@ package org.nextsus.cso.ela.features;
 import org.nextsus.cso.ela.neighborhood.Neighborhood;
 import org.nextsus.cso.ela.neighborhood.impl.*;
 import org.nextsus.cso.ela.sampling.Walk;
+import org.nextsus.cso.model.UDN;
 import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.qualityindicator.impl.hypervolume.impl.PISAHypervolume;
+import org.uma.jmetal.util.NormalizeUtils;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.dominanceComparator.DominanceComparator;
 import org.uma.jmetal.util.comparator.dominanceComparator.impl.DefaultDominanceComparator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LocalFeatures {
     protected Problem<BinaryCSOSolution> problem;
@@ -58,24 +62,97 @@ public class LocalFeatures {
         //          cuando no hay correlación, es complicado mejorar localmente. Esto caracteriza la dificultad del landscape multiobjetivo.
         //          - f_cor_rws -> Estimación del grado de correlación entre objetivos.
 
+        /*
+        TODO
+        - Sacar por cada solución y tipo el número de celdas ON/OFF, y número de sectores y BS completamente ON/OFF
+        - Número de usuarios asignados a tipos de celdas
+         */
+
         System.out.println("\n# Computing local landscape features #\n");
 
-        double x = 0.0;
-        double y = ((StaticCSO) problem).getCapacityUpperLimit();
-        PISAHypervolume hv = new PISAHypervolume(new double[]{x, y});
+        double xLowerLimit = 0.0;
+        double xUpperLimit = ((StaticCSO) problem).getConsumptionUpperLimit();
+        double yLowerLimit = 0.0;
+        double yUpperLimit = -((StaticCSO) problem).getCapacityUpperLimit();
+        PISAHypervolume hv = new PISAHypervolume(new double[][]{new double[]{xLowerLimit, yUpperLimit}, new double[]{xUpperLimit, yLowerLimit}});
 
         List<Double> inf_avg_list = new ArrayList<>();
         List<Double> sup_avg_list = new ArrayList<>();
         List<Double> inc_avg_list = new ArrayList<>();
         List<Double> lnd_avg_list = new ArrayList<>();
         List<Double> lsupp_avg_list = new ArrayList<>();
+
         List<Double> hv_avg_list = new ArrayList<>();
         List<Double> hvd_avg_list = new ArrayList<>();
         List<Double> nhv_avg_list = new ArrayList<>();
 
+        Map<UDN.CellType, List<Double>> cell_on_avg_map = new HashMap<>();
+        Map<UDN.CellType, List<Double>> cell_off_avg_map = new HashMap<>();
+        Map<UDN.CellType, List<Double>> sector_on_avg_map = new HashMap<>();
+        Map<UDN.CellType, List<Double>> sector_off_avg_map = new HashMap<>();
+        Map<UDN.CellType, List<Double>> bs_on_avg_map = new HashMap<>();
+        Map<UDN.CellType, List<Double>> bs_off_avg_map = new HashMap<>();
+        Map<UDN.CellType, List<Double>> ue_avg_map = new HashMap<>();
+        for (UDN.CellType cellType : List.of(UDN.CellType.MICRO, UDN.CellType.PICO, UDN.CellType.FEMTO)) {
+            cell_on_avg_map.put(cellType, new ArrayList<>());
+            cell_off_avg_map.put(cellType, new ArrayList<>());
+            sector_on_avg_map.put(cellType, new ArrayList<>());
+            sector_off_avg_map.put(cellType, new ArrayList<>());
+            bs_on_avg_map.put(cellType, new ArrayList<>());
+            bs_off_avg_map.put(cellType, new ArrayList<>());
+            ue_avg_map.put(cellType, new ArrayList<>());
+
+            System.out.println("Celdas " + cellType + " = " + ((StaticCSO) problem).getUDN().getNumberOfCellsByType(cellType));
+            System.out.println("Sectores " + cellType + " = " + ((StaticCSO) problem).getUDN().getSectorsList().stream().filter(s -> s.getCells().get(0).getType().equals(cellType)).count());
+            System.out.println("BS " + cellType + " = " + ((StaticCSO) problem).getUDN().getBTSsList().stream().filter(b -> b.getSectors().get(0).getCells().get(0).getType().equals(cellType)).count());
+        }
+
         for (BinaryCSOSolution solution : solutionSet) {
-//            List<BinaryCSOSolution> neighborhood = getHammingNeighborhood(solution);
+            problem.evaluate(solution);
+
+            // Features from the instance
+
+            for (UDN.CellType cellType : List.of(UDN.CellType.MICRO, UDN.CellType.PICO, UDN.CellType.FEMTO)) {
+                int[] actives = ((StaticCSO) problem).getUDN().getActiveByType(cellType);
+
+                // BS
+                List<Double> bs_tmp = bs_on_avg_map.get(cellType);
+                bs_tmp.add((double) actives[0]);
+                bs_on_avg_map.put(cellType, bs_tmp);
+
+//                bs_tmp = bs_off_avg_map.get(cellType);
+//                bs_tmp.add((double) ((StaticCSO) problem).getUDN().getBTSsList().stream().filter(b -> b.getSectors().get(0).getCells().get(0).getType().equals(cellType)).toList().size() - actives[0]);
+//                bs_off_avg_map.put(cellType, bs_tmp);
+
+                // Sector
+                List<Double> sector_tmp = sector_on_avg_map.get(cellType);
+                sector_tmp.add((double) actives[1]);
+                sector_on_avg_map.put(cellType, sector_tmp);
+
+//                sector_tmp = sector_off_avg_map.get(cellType);
+//                sector_tmp.add((double) ((StaticCSO) problem).getUDN().getSectorsList().stream().filter(s -> s.getCells().get(0).getType().equals(cellType)).toList().size() - actives[1]);
+//                sector_off_avg_map.put(cellType, sector_tmp);
+
+                // Cell
+                List<Double> cell_tmp = cell_on_avg_map.get(cellType);
+                cell_tmp.add((double) actives[2]);
+                cell_on_avg_map.put(cellType, cell_tmp);
+
+//                cell_tmp = cell_off_avg_map.get(cellType);
+//                cell_tmp.add((double) ((StaticCSO) problem).getUDN().getNumberOfCellsByType(cellType) - actives[2]);
+//                cell_off_avg_map.put(cellType, cell_tmp);
+
+                // UE
+                List<Double> ue_tmp = ue_avg_map.get(cellType);
+                ue_tmp.add((double) ((StaticCSO) problem).getUDN().getNumberUsersAssignmentByType(cellType));
+                ue_avg_map.put(cellType, ue_tmp);
+            }
+
+            // Features from the neighborhood
             List<BinaryCSOSolution> neighborhood = n.getNeighborhood(solution);
+
+            for (BinaryCSOSolution neighbor : neighborhood)
+                problem.evaluate(neighbor);
 
             // To obtain the PS
             NonDominatedSolutionListArchive<BinaryCSOSolution> nonDominatedSolutionArchive = new NonDominatedSolutionListArchive<>();
@@ -85,7 +162,7 @@ public class LocalFeatures {
             lsupp_avg_list.add(getSupportedSolutions(nonDominatedSolutionArchive.solutions()));
 
             double[][] frontSolution = solutionListToDoubleMatrix(List.of(solution));
-            double solutionHV = hv.compute(frontSolution);
+            double solutionHV = hv.compute(NormalizeUtils.normalize(frontSolution, NormalizeUtils.getMinValuesOfTheColumnsOfAMatrix(hv.getReferenceFront()), NormalizeUtils.getMaxValuesOfTheColumnsOfAMatrix(hv.getReferenceFront())));
 
             List<Double> hv_list = new ArrayList<>();
             List<Double> hvd_list = new ArrayList<>();
@@ -102,7 +179,7 @@ public class LocalFeatures {
                 }
 
                 double[][] frontNeighbor = solutionListToDoubleMatrix(List.of(neighbor));
-                hv_list.add(hv.compute(frontNeighbor));
+                hv_list.add(hv.compute(NormalizeUtils.normalize(frontNeighbor, NormalizeUtils.getMinValuesOfTheColumnsOfAMatrix(hv.getReferenceFront()), NormalizeUtils.getMaxValuesOfTheColumnsOfAMatrix(hv.getReferenceFront()))));
                 hvd_list.add(Math.abs(solutionHV - hv_list.get(hv_list.size() - 1)));
             }
             inf_avg_list.add(inf);
@@ -111,20 +188,41 @@ public class LocalFeatures {
 
             hv_avg_list.add(hv_list.stream().mapToDouble(i -> i).sum() / neighborhood.size());   // Promedio HV de los vecinos
             hvd_avg_list.add(hvd_list.stream().mapToDouble(i -> i).sum() / neighborhood.size()); // Diferencia promedio entre el HV de los vecinos y el de la solución actual
-            nhv_avg_list.add(hv.compute(solutionListToDoubleMatrix(neighborhood)));              // HV del vecindario completo
+            nhv_avg_list.add(hv.compute(NormalizeUtils.normalize(solutionListToDoubleMatrix(neighborhood), NormalizeUtils.getMinValuesOfTheColumnsOfAMatrix(hv.getReferenceFront()), NormalizeUtils.getMaxValuesOfTheColumnsOfAMatrix(hv.getReferenceFront()))));
         }
 
-        int inf_avg = (int) inf_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-        int sup_avg = (int) sup_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-        int inc_avg = (int) inc_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-        int lnd_avg = (int) lnd_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
-        int lsupp_avg = (int) lsupp_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double inf_avg = inf_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double sup_avg = sup_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double inc_avg = inc_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double lnd_avg = lnd_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
+        double lsupp_avg = lsupp_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
         double hv_avg = hv_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
         double hvd_avg = hvd_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
         double nhv_avg = nhv_avg_list.stream().mapToDouble(i -> i).sum() / solutionSet.size();
 
+        System.out.println("Average ON/OFF");
+        for (UDN.CellType cellType : List.of(UDN.CellType.MICRO, UDN.CellType.PICO, UDN.CellType.FEMTO)) {
+            double bs_on = bs_on_avg_map.get(cellType).stream().mapToDouble(i -> i).sum() / solutionSet.size();
+            double bs_off = ((StaticCSO) problem).getUDN().getBTSsList().stream().filter(b -> b.getSectors().get(0).getCells().get(0).getType().equals(cellType)).toList().size() - bs_on;
+
+            double sector_on = sector_on_avg_map.get(cellType).stream().mapToDouble(i -> i).sum() / solutionSet.size();
+            double sector_off = ((StaticCSO) problem).getUDN().getSectorsList().stream().filter(s -> s.getCells().get(0).getType().equals(cellType)).toList().size() - sector_on;
+
+            double cell_on = cell_on_avg_map.get(cellType).stream().mapToDouble(i -> i).sum() / solutionSet.size();
+            double cell_off = ((StaticCSO) problem).getUDN().getNumberOfCellsByType(cellType) - cell_on;
+
+            System.out.println("\t" + cellType);
+            System.out.println("\t\t#bs_on = " + bs_on);
+            System.out.println("\t\t#bs_off = " + bs_off);
+            System.out.println("\t\t#sector_on = " + sector_on);
+            System.out.println("\t\t#sector_off = " + sector_off);
+            System.out.println("\t\t#cell_on = " + cell_on);
+            System.out.println("\t\t#cell_off = " + cell_off);
+            System.out.println("\t\t#ue = " + ue_avg_map.get(cellType).stream().mapToDouble(i -> i).sum() / solutionSet.size());
+        }
+
         // Print common features between random and adaptive walk
-        System.out.println("#inf_avg = " + inf_avg);
+        System.out.println("\n#inf_avg = " + inf_avg);
         System.out.println("#sup_avg = " + sup_avg);
         System.out.println("#inc_avg = " + inc_avg);
         System.out.println("#lnd_avg = " + lnd_avg);

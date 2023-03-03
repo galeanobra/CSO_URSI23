@@ -169,6 +169,8 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
         return capacity;
     }
 
+
+
     public int getRun() {
         return this.run_;
     }

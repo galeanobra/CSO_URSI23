@@ -13,6 +13,9 @@ public abstract class Walk {
     protected int numberOfBits;
     protected int steps;
     protected int walkLength;
+
+    protected int evaluations;
+    protected int maxEvaluations;
     protected SelectionOperator<List<BinaryCSOSolution>, BinaryCSOSolution> selectionOperator;
     protected List<BinaryCSOSolution> walk;
 

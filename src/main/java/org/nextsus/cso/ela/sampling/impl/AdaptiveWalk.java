@@ -21,10 +21,11 @@ public class AdaptiveWalk extends Walk {
     protected int maxWalkLength;
     protected boolean plo;
 
-    public AdaptiveWalk(Problem<BinaryCSOSolution> problem, int maxWalkLength, int numberOfBits, Neighborhood.NeighborhoodType neighborhoodType) {
+    public AdaptiveWalk(Problem<BinaryCSOSolution> problem, int maxEvaluations, int numberOfBits, Neighborhood.NeighborhoodType neighborhoodType) {
         this.problem = problem;
         steps = 0;
-        this.maxWalkLength = maxWalkLength;
+        evaluations = 0;
+        this.maxEvaluations = maxEvaluations;
         selectionOperator = new RandomSelection<>();
         this.numberOfBits = numberOfBits;
         walk = new ArrayList<>();
@@ -47,9 +48,8 @@ public class AdaptiveWalk extends Walk {
 
         System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
 
-
         // Adaptive walk
-        while (steps < maxWalkLength || plo) {
+        while (evaluations < maxEvaluations || plo) {
             // Get an improved neighbor
             current = getImprovedNeighbor(current);
 
@@ -60,7 +60,7 @@ public class AdaptiveWalk extends Walk {
                 System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
             } else {
                 plo = true;
-                System.out.println("PLO at steps = " + steps + "\n");
+                System.out.println("PLO  = " + steps + "\n");
             }
         }
 
@@ -75,6 +75,8 @@ public class AdaptiveWalk extends Walk {
         BinaryCSOSolution neighbor = null;
         for (int i : permutation) {
             neighbor = neighborhood.get(i);
+            problem.evaluate(neighbor);
+            evaluations++;
             if (comparator.compare(neighbor, solution) < 0) break;
         }
 

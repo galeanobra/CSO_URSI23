@@ -1301,6 +1301,29 @@ public abstract class UDN {
         return count;
     }
 
+    public int[] getActiveByType(CellType type) {
+        int countBS = 0;
+        int countSector = 0;
+        int countCell = 0;
+
+        for (BTS b : btsList.stream().filter(bts -> bts.getSectors().get(0).getCells().get(0).getType().equals(type)).toList()) {
+            List<Sector> activeSectors = b.getActiveSectors();
+            if (activeSectors.size() > 0) {
+                countBS++;
+                countSector += activeSectors.size();
+                for (Sector s : activeSectors) {
+                    countCell += s.getActiveCells();
+                }
+            }
+        }
+
+        return new int[]{countBS, countSector, countCell};
+    }
+
+    public int getNumberUsersAssignmentByType(CellType type) {
+        return users.stream().filter(u -> u.getServingCell().getType().equals(type)).toList().size();
+    }
+
     /**
      * Restarts different data structures in all the Points used to store precomputed signal power and
      * SINR. The goal is saving computational time and memory.
@@ -1321,6 +1344,17 @@ public abstract class UDN {
         for (Double d : cells.keySet()) {
             for (Cell c : cells.get(d)) {
                 if (c.getType() == type && c.isActive()) count++;
+            }
+        }
+        return count;
+    }
+
+    public int getNumberOfCellsByType(CellType type) {
+        int count = 0;
+        for (Double d : cells.keySet()) {
+            for (Cell c : cells.get(d)) {
+                if (c.getType().equals(type))
+                    count++;
             }
         }
         return count;
