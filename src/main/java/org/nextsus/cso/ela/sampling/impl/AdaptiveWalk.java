@@ -49,7 +49,7 @@ public class AdaptiveWalk extends Walk {
         System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
 
         // Adaptive walk
-        while (evaluations < maxEvaluations || plo) {
+        while (evaluations < maxEvaluations && !plo) {
             // Get an improved neighbor
             current = getImprovedNeighbor(current);
 
@@ -57,10 +57,10 @@ public class AdaptiveWalk extends Walk {
             if (current != null) {
                 walk.add(current);
                 steps++;
-                System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
+                System.out.println("Steps = " + steps + " - Evaluations = " + evaluations + " - Objectives = " + Arrays.toString(current.objectives()));
             } else {
                 plo = true;
-                System.out.println("PLO  = " + steps + "\n");
+                System.out.println("PLO -> Steps = " + steps + " - Evaluations = " + evaluations + "\n");
             }
         }
 
@@ -72,15 +72,14 @@ public class AdaptiveWalk extends Walk {
         List<Integer> permutation = createIntegerPermutation(neighborhood.size());
 
         DominanceComparator<BinaryCSOSolution> comparator = new DefaultDominanceComparator<>();
-        BinaryCSOSolution neighbor = null;
         for (int i : permutation) {
-            neighbor = neighborhood.get(i);
+            BinaryCSOSolution neighbor = neighborhood.get(i);
             problem.evaluate(neighbor);
             evaluations++;
-            if (comparator.compare(neighbor, solution) < 0) break;
+            if (comparator.compare(neighbor, solution) < 0) return neighbor;
         }
 
-        return neighbor;
+        return null;
     }
 
     private List<Integer> createIntegerPermutation(int size) {

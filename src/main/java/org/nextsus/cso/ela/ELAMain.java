@@ -50,9 +50,9 @@ public class ELAMain {
         System.out.println("\n# Execution completed #\n");
 
         // Set the output directory according to the system (config folder if Condor or Windows, out folder if Picasso or UNIX system)
-        String name = alg + "_" + run;
-        String FUN = name + ".FUN." + taskID + "." + jobID + ".csv";
-        String VAR = name + ".VAR." + taskID + "." + jobID + ".csv";
+        String name = alg + "." + run + "." + taskID + "." + jobID + ".csv";
+        String FUN = "FUN." + name;
+        String VAR = "VAR." + name;
 
         new SolutionListOutput(population).setVarFileOutputContext(new DefaultFileOutputContext(VAR, ",")).setFunFileOutputContext(new DefaultFileOutputContext(FUN, ",")).print();
 
