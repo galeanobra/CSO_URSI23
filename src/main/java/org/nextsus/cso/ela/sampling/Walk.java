@@ -21,5 +21,11 @@ public abstract class Walk {
 
     protected Neighborhood n;
 
+    protected BinaryCSOSolution initialSolution;
+
     public abstract List<BinaryCSOSolution> execute();
+
+    public void setInitialSolution(BinaryCSOSolution initialSolution) {
+        this.initialSolution = initialSolution;
+    }
 }

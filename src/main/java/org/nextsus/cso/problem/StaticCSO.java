@@ -17,10 +17,15 @@ import java.util.List;
  */
 public class StaticCSO extends CSO {
 
+    private String mainConfig;
+    private String scenario;
+
     /**
      * Creates an instance of the Static CSO problem
      */
     public StaticCSO(String mainConfig, String scenario, int run) {
+        this.mainConfig = mainConfig;
+        this.scenario = scenario;
 
         udn_ = new StaticUDN(mainConfig, scenario, run);
 
@@ -35,6 +40,10 @@ public class StaticCSO extends CSO {
         System.out.println("\n# Execution started #\n");
 
 //        udn_.getCellsOfInterestByPoint();
+    }
+
+    public StaticCSO(StaticCSO staticCSO) {
+        this(staticCSO.mainConfig, staticCSO.scenario, staticCSO.run_);
     }
 
     @Override

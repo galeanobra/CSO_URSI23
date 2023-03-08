@@ -15,6 +15,7 @@
     </properties>
 
     <build>
+        <finalName>CSO-without-dependencies</finalName>
         <testResources>
             <testResource>
                 <directory>${project.basedir}/src/test/resources</directory>
@@ -29,9 +30,11 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.4.2</version>
                 <configuration>
+                    <finalName>CSO</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
+                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
                 <executions>
                     <execution>
@@ -42,6 +45,24 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>scp_JAR.cmd</executable>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
         </plugins>
     </build>
 
@@ -93,6 +114,11 @@
             <groupId>org.tallison</groupId>
             <artifactId>jmatio</artifactId>
             <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
         </dependency>
     </dependencies>
 </project>

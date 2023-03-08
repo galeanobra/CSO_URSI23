@@ -31,22 +31,23 @@ public class AdaptiveWalk extends Walk {
         walk = new ArrayList<>();
         plo = false;
         n = switch (neighborhoodType) {
-            case Tower -> new TowerNeighborhood(problem);
-            case BS -> new BSNeighborhood(problem);
-            case Sector -> new SectorNeighborhood(problem);
-            case Cell -> new CellNeighborhood(problem);
-            case Hamming -> new HammingNeighborhood(problem);
+            case Tower -> new TowerNeighborhood(problem, 1.0);
+            case BS -> new BSNeighborhood(problem, 1.0);
+            case Sector -> new SectorNeighborhood(problem, 1.0);
+            case Cell -> new CellNeighborhood(problem, 1.0);
+            case Hamming -> new HammingNeighborhood(problem, 1.0);
         };
+        initialSolution = null;
     }
 
     @Override
     public List<BinaryCSOSolution> execute() {
-        // Create and evaluate a solution
-        BinaryCSOSolution current = new BinaryCSOSolution(List.of(numberOfBits), problem.numberOfObjectives());
+        // Create and evaluate a solution (random or not)
+        BinaryCSOSolution current = initialSolution == null ? new BinaryCSOSolution(List.of(numberOfBits), problem.numberOfObjectives()) : initialSolution;
         problem.evaluate(current);
         walk.add(current);
 
-        System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
+//        System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
 
         // Adaptive walk
         while (evaluations < maxEvaluations && !plo) {
@@ -57,7 +58,7 @@ public class AdaptiveWalk extends Walk {
             if (current != null) {
                 walk.add(current);
                 steps++;
-                System.out.println("Steps = " + steps + " - Evaluations = " + evaluations + " - Objectives = " + Arrays.toString(current.objectives()));
+//                System.out.println("Steps = " + steps + " - Evaluations = " + evaluations + " - Objectives = " + Arrays.toString(current.objectives()));
             } else {
                 plo = true;
                 System.out.println("PLO -> Steps = " + steps + " - Evaluations = " + evaluations + "\n");

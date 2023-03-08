@@ -21,23 +21,23 @@ public class RandomWalk extends Walk {
         this.numberOfBits = numberOfBits;
         walk = new ArrayList<>();
         n = switch (neighborhoodType) {
-            case Tower -> new TowerNeighborhood(problem);
-            case BS -> new BSNeighborhood(problem);
-            case Sector -> new SectorNeighborhood(problem);
-            case Cell -> new CellNeighborhood(problem);
-            case Hamming -> new HammingNeighborhood(problem);
+            case Tower -> new TowerNeighborhood(problem, 1.0);
+            case BS -> new BSNeighborhood(problem, 1.0);
+            case Sector -> new SectorNeighborhood(problem, 1.0);
+            case Cell -> new CellNeighborhood(problem, 1.0);
+            case Hamming -> new HammingNeighborhood(problem, 1.0);
         };
     }
 
     @Override
     public List<BinaryCSOSolution> execute() {
         // Create and evaluate a solution
-        BinaryCSOSolution current = new BinaryCSOSolution(List.of(numberOfBits), problem.numberOfObjectives());
+        BinaryCSOSolution current = initialSolution == null ? new BinaryCSOSolution(List.of(numberOfBits), problem.numberOfObjectives()) : initialSolution;
         problem.evaluate(current);
         evaluations++;
         walk.add(current);
 
-        System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
+//        System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
 
         // Random walk
         while (steps < walkLength) {
@@ -48,7 +48,7 @@ public class RandomWalk extends Walk {
             walk.add(current);
             steps++;
 
-            System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
+//            System.out.println("Steps = " + steps + " - Objectives = " + Arrays.toString(current.objectives()));
         }
 
         return walk;

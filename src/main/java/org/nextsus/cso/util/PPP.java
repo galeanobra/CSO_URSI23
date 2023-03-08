@@ -1,14 +1,20 @@
 package org.nextsus.cso.util;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
  * @author paco
  */
-public class PPP {
+public class PPP implements Serializable {
 
     Random random_;
     long seed_;
+
+    public PPP(Random r) {
+        this.seed_ = r.nextLong();
+        this.random_ = new Random(this.seed_);
+    }
 
     public int getPoisson(double lambda) {
         double L = Math.exp(-lambda);
@@ -47,11 +53,6 @@ public class PPP {
                 }
             }
         }
-    }
-
-    public PPP(Random r) {
-        this.seed_ = r.nextLong();
-        this.random_ = new Random(this.seed_);
     }
 
     private double LogFactorial(int n) {

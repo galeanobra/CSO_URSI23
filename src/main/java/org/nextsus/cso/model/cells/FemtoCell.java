@@ -2,10 +2,12 @@ package org.nextsus.cso.model.cells;
 
 import org.nextsus.cso.model.UDN;
 
+import java.io.Serializable;
+
 /**
  * Femtocell type
  */
-public class FemtoCell extends Cell {
+public class FemtoCell extends Cell implements Serializable {
 
     public FemtoCell(UDN udn, Sector sector, String name, int x, int y, int z, double transmittedPower, double alfa, double beta, double delta, double transmitterGain, double receptorGain, double workingFrequency, double coverageRadius) {
 

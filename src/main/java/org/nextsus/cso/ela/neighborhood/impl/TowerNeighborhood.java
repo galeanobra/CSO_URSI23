@@ -8,8 +8,8 @@ import java.util.List;
 
 public class TowerNeighborhood extends Neighborhood {
 
-    public TowerNeighborhood(Problem<BinaryCSOSolution> problem){
-        super(problem);
+    public TowerNeighborhood(Problem<BinaryCSOSolution> problem, double percentage) {
+        super(problem, percentage);
     }
 
     @Override

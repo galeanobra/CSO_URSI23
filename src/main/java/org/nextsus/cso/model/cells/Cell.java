@@ -1,17 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.nextsus.cso.model.cells;
 
 import org.nextsus.cso.model.UDN;
 import org.nextsus.cso.model.users.User;
 
+import java.io.Serializable;
+
 /**
  * Class representing a cell of a sector
  */
-public abstract class Cell {
+public abstract class Cell implements Serializable {
 
     protected static int uniqueId_ = 0;
 

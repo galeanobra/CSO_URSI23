@@ -7,10 +7,12 @@ package org.nextsus.cso.model;
 
 import org.nextsus.cso.model.cells.BTS;
 
+import java.io.Serializable;
+
 /**
  * @author paco
  */
-public class SocialAttractor {
+public class SocialAttractor implements Serializable {
 
     private final int id_;
     private int x_;

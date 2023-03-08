@@ -2,10 +2,12 @@ package org.nextsus.cso.model.cells;
 
 import org.nextsus.cso.model.UDN;
 
+import java.io.Serializable;
+
 /**
  * Microcell type
  */
-public class MicroCell extends Cell {
+public class MicroCell extends Cell implements Serializable {
 
     public MicroCell(UDN udn, Sector sector, String name, int x, int y, int z, double transmittedPower, double alfa, double beta, double delta, double transmitterGain, double receptorGain, double workingFrequency) {
         super(udn, sector, name, x, y, z, transmittedPower, alfa, beta, delta, transmitterGain, receptorGain, workingFrequency);

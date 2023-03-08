@@ -13,6 +13,7 @@ import org.nextsus.cso.util.PPP;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.*;
 
 import static java.lang.Math.abs;
@@ -21,7 +22,7 @@ import static java.lang.Math.acos;
 /**
  * @author paco
  */
-public abstract class UDN {
+public abstract class UDN implements Serializable {
 
     /**
      * Misc
@@ -1353,8 +1354,7 @@ public abstract class UDN {
         int count = 0;
         for (Double d : cells.keySet()) {
             for (Cell c : cells.get(d)) {
-                if (c.getType().equals(type))
-                    count++;
+                if (c.getType().equals(type)) count++;
             }
         }
         return count;

@@ -4,12 +4,13 @@ import org.nextsus.cso.model.cells.BTS;
 import org.nextsus.cso.model.cells.Cell;
 import org.nextsus.cso.model.cells.Sector;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * Class representing a point of the grid
  */
-public class Point {
+public class Point implements Serializable {
     UDN udn;
 
     // Point coordinates

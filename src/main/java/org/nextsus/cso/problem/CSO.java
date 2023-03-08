@@ -154,7 +154,7 @@ public abstract class CSO extends AbstractBinaryCSOProblem {
         udn_.resetNumberOfUsersAssignedToCells();
 
         for (User u : this.udn_.getUsers()) {
-            u.setServingCell(udn_.getGridPoint(u.getX(), u.getY(), u.getZ()).getCellWithHigherSNR());
+            u.setServingCell(udn_.getGridPoint(u.getX(), u.getY(), u.getZ()).getCellWithHigherSNRByType(FEMTO));
             u.getServingCell().setNumbersOfUsersAssigned(1);
         }
 

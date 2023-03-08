@@ -7,14 +7,15 @@ import org.nextsus.cso.problem.StaticCSO;
 import org.nextsus.cso.solution.BinaryCSOSolution;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.util.binarySet.BinarySet;
+import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BSNeighborhood extends Neighborhood {
 
-    public BSNeighborhood(Problem<BinaryCSOSolution> problem) {
-        super(problem);
+    public BSNeighborhood(Problem<BinaryCSOSolution> problem, double percentage) {
+        super(problem, percentage);
     }
 
     @Override
@@ -31,11 +32,12 @@ public class BSNeighborhood extends Neighborhood {
 
             int i = b.getSectors().get(0).getCells().get(0).getID();
             for (BinarySet binarySet : neighborsBinarySet) {
-                BinaryCSOSolution neighbor = solution.copy();
-                for (int j = 0; j < binarySet.getBinarySetLength(); j++)
-                    neighbor.variables().get(0).set(i + j, binarySet.get(j));
-                problem.evaluate(neighbor);
-                neighbors.add(neighbor);
+                if (JMetalRandom.getInstance().nextDouble() <= percentage) {
+                    BinaryCSOSolution neighbor = solution.copy();
+                    for (int j = 0; j < binarySet.getBinarySetLength(); j++)
+                        neighbor.variables().get(0).set(i + j, binarySet.get(j));
+                    neighbors.add(neighbor);
+                }
             }
         }
 

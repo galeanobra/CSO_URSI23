@@ -4,12 +4,13 @@ import org.nextsus.cso.model.UDN;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Properties;
 
 /**
  * Random waypoint mobility model
  */
-public class RandomWaypoint extends MobilityModel {
+public class RandomWaypoint extends MobilityModel implements Serializable {
 
     // Velocity in m/s
     private double minV_;

@@ -1,9 +1,11 @@
 package org.nextsus.cso.model;
 
+import java.io.Serializable;
+
 /**
  * @author paco
  */
-public class Region {
+public class Region implements Serializable {
     int id;
     int x;
     int y;

@@ -6,12 +6,13 @@ import org.nextsus.cso.model.UDN;
 import org.nextsus.cso.model.cells.Cell;
 import org.nextsus.cso.util.PPP;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
  * @author paco
  */
-public class User {
+public class User implements Serializable {
 
     int id_;
 

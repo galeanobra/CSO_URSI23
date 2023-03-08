@@ -2,13 +2,14 @@ package org.nextsus.cso.model;
 
 import org.nextsus.cso.model.cells.Cell;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class representing the interest points (boundaries of propagation regions) of a discrete line between a Cell and a Point
  */
-public class MultiSegment {
+public class MultiSegment implements Serializable {
 
     Point p;
     Cell c;

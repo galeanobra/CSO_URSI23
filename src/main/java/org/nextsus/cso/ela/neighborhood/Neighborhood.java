@@ -8,9 +8,11 @@ import java.util.List;
 
 public abstract class Neighborhood {
     protected Problem<BinaryCSOSolution> problem;
+    protected double percentage;
 
-    public Neighborhood(Problem<BinaryCSOSolution> problem) {
+    public Neighborhood(Problem<BinaryCSOSolution> problem, double percentage) {
         this.problem = problem;
+        this.percentage = percentage;
     }
 
     public abstract List<BinaryCSOSolution> getNeighborhood(BinaryCSOSolution solution);

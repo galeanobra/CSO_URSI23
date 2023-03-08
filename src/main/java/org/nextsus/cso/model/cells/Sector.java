@@ -7,13 +7,14 @@ package org.nextsus.cso.model.cells;
 
 import org.nextsus.cso.model.UDN;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Class representing a Sector of a BTS
  */
-public class Sector {
+public class Sector implements Serializable {
 
     int x_;
     int y_;
